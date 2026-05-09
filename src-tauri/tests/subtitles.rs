@@ -1,0 +1,64 @@
+use molspark_desktop::error::AppError;
+use molspark_desktop::models::{
+    ExportArtifactKind, SubtitleSegment, TranscriptResult,
+};
+use molspark_desktop::services::subtitles::{SubtitleExtractionRequest, SubtitleService};
+
+struct FakeSubtitleClient {
+    result: TranscriptResult,
+}
+
+impl FakeSubtitleClient {
+    fn new(result: TranscriptResult) -> Self {
+        Self { result }
+    }
+}
+
+impl molspark_desktop::services::subtitles::GeminiSubtitleClientLike for FakeSubtitleClient {
+    fn extract_subtitles(
+        &self,
+        _request: SubtitleExtractionRequest,
+        _export_dir: &str,
+    ) -> Result<TranscriptResult, AppError> {
+        Ok(self.result.clone())
+    }
+}
+
+#[test]
+fn returns_transcript_segments_and_artifact_from_fake_client() {
+    let service = SubtitleService::new(Box::new(FakeSubtitleClient::new(TranscriptResult {
+        segments: vec![
+            SubtitleSegment {
+                start_ms: 0,
+                end_ms: 1500,
+                text: "你好".to_string(),
+            },
+            SubtitleSegment {
+                start_ms: 1500,
+                end_ms: 3000,
+                text: "世界".to_string(),
+            },
+        ],
+        artifact: molspark_desktop::models::ExportArtifact {
+            path: "C:/exports/sample.srt".to_string(),
+            kind: ExportArtifactKind::Srt,
+        },
+    })));
+
+    let result = service
+        .extract(
+            SubtitleExtractionRequest {
+                model: "gemini-2.0-flash".to_string(),
+                file_name: "sample.wav".to_string(),
+                mime_type: "audio/wav".to_string(),
+                data: vec![1, 2, 3],
+            },
+            "C:/exports".to_string(),
+        )
+        .unwrap();
+
+    assert_eq!(result.segments.len(), 2);
+    assert_eq!(result.segments[0].text, "你好");
+    assert_eq!(result.artifact.path, "C:/exports/sample.srt");
+    assert_eq!(result.artifact.kind, ExportArtifactKind::Srt);
+}
