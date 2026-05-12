@@ -1,9 +1,13 @@
 pub mod error;
-pub mod models;
+pub mod models {
+    include!("models.rs");
+    pub mod installer;
+}
 pub mod commands {
     pub mod chat;
     pub mod history;
     pub mod image;
+    pub mod installer;
     pub mod settings;
     pub mod subtitles;
 }
@@ -18,6 +22,7 @@ pub mod services {
         pub mod client;
     }
     pub mod image;
+    pub mod installer;
     pub mod settings;
     pub mod srt;
     pub mod subtitles;
@@ -30,6 +35,7 @@ pub fn run() {
             commands::chat::send_chat_message,
             commands::history::list_chat_history,
             commands::image::generate_image,
+            commands::installer::load_installer_snapshot,
             commands::settings::load_settings,
             commands::settings::save_api_key,
             commands::settings::clear_api_key,
@@ -39,5 +45,5 @@ pub fn run() {
             commands::subtitles::extract_subtitles
         ])
         .run(tauri::generate_context!())
-        .expect("failed to run MolSpark desktop app");
+        .expect("failed to run AI Dev Installer");
 }
