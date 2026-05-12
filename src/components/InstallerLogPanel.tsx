@@ -4,6 +4,20 @@ interface InstallerLogPanelProps {
   logs: InstallerLogEntry[];
 }
 
+const STAGE_LABELS: Record<InstallerLogEntry["stage"], string> = {
+  idle: "IDLE",
+  preflight: "PREFLIGHT",
+  install_git: "INSTALL_GIT",
+  install_node: "INSTALL_NODE",
+  install_cc_switch: "INSTALL_CC_SWITCH",
+  refresh_environment: "REFRESH_ENVIRONMENT",
+  install_claude_code: "INSTALL_CLAUDE_CODE",
+  install_codex: "INSTALL_CODEX",
+  verify: "VERIFY",
+  completed: "COMPLETED",
+  failed: "FAILED"
+};
+
 const LEVEL_COLORS: Record<InstallerLogEntry["level"], string> = {
   info: "#0f172a",
   warn: "#b45309",
@@ -50,7 +64,41 @@ export function InstallerLogPanel({ logs }: InstallerLogPanelProps) {
                 color: LEVEL_COLORS[entry.level]
               }}
             >
-              <strong>{entry.timestamp}</strong>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: "8px"
+                }}
+              >
+                <strong>{entry.timestamp}</strong>
+                <span
+                  style={{
+                    padding: "2px 8px",
+                    borderRadius: "999px",
+                    background: "rgba(15, 23, 42, 0.08)",
+                    fontSize: "0.8rem",
+                    fontWeight: 700,
+                    letterSpacing: "0.03em"
+                  }}
+                >
+                  [{STAGE_LABELS[entry.stage]}]
+                </span>
+                <span
+                  style={{
+                    padding: "2px 8px",
+                    borderRadius: "999px",
+                    background: "rgba(255, 255, 255, 0.72)",
+                    border: "1px solid rgba(15, 23, 42, 0.08)",
+                    fontSize: "0.8rem",
+                    fontWeight: 700,
+                    letterSpacing: "0.03em"
+                  }}
+                >
+                  {entry.level.toUpperCase()}
+                </span>
+              </div>
               <p style={{ margin: "6px 0 0" }}>{entry.message}</p>
             </li>
           ))}

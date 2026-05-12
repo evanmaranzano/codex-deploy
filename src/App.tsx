@@ -33,27 +33,77 @@ function isBusyStage(stage: InstallerSnapshot["currentStage"]) {
   return !["idle", "completed", "failed"].includes(stage);
 }
 
+function toErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
+}
+
+function createInitializationFailureSnapshot(message: string): InstallerSnapshot {
+  return {
+    currentStage: "failed",
+    progressPercent: 0,
+    components: EMPTY_SNAPSHOT.components.map((component) => ({
+      ...component,
+      status: "failed",
+      detail: "初始化安装器桥接失败"
+    })),
+    logs: [
+      {
+        timestamp: new Date().toLocaleTimeString("zh-CN", { hour12: false }),
+        stage: "failed",
+        level: "error",
+        message
+      }
+    ],
+    lastError: message
+  };
+}
+
 export default function App() {
   const [snapshot, setSnapshot] = useState<InstallerSnapshot>(EMPTY_SNAPSHOT);
   const [isBusy, setIsBusy] = useState(false);
+  const [hasInitializationError, setHasInitializationError] = useState(false);
 
   useEffect(() => {
     let mounted = true;
     let unlisten: (() => void) | undefined;
 
-    void loadInstallerSnapshot().then((value) => {
-      if (mounted) {
-        setSnapshot(value);
-        setIsBusy(isBusyStage(value.currentStage));
+    const failInitialization = (message: string) => {
+      if (!mounted) {
+        return;
       }
-    });
+
+      setSnapshot(createInitializationFailureSnapshot(message));
+      setIsBusy(false);
+      setHasInitializationError(true);
+    };
+
+    void loadInstallerSnapshot()
+      .then((value) => {
+        if (mounted) {
+          setSnapshot(value);
+          setIsBusy(isBusyStage(value.currentStage));
+          setHasInitializationError(false);
+        }
+      })
+      .catch((error: unknown) => {
+        failInitialization(`初始化失败：无法加载安装器状态。${toErrorMessage(error)}`);
+      });
 
     void listenInstallerSnapshot((value) => {
+      if (!mounted) {
+        return;
+      }
+
       setSnapshot(value);
       setIsBusy(isBusyStage(value.currentStage));
-    }).then((dispose) => {
-      unlisten = dispose;
-    });
+      setHasInitializationError(false);
+    })
+      .then((dispose) => {
+        unlisten = dispose;
+      })
+      .catch((error: unknown) => {
+        failInitialization(`初始化失败：无法订阅安装器状态更新。${toErrorMessage(error)}`);
+      });
 
     return () => {
       mounted = false;
@@ -84,6 +134,7 @@ export default function App() {
         <InstallerPage
           snapshot={snapshot}
           isBusy={isBusy}
+          hasInitializationError={hasInitializationError}
           onInstallClaude={() => void startInstallFlow("install_claude")}
           onInstallCodex={() => void startInstallFlow("install_codex")}
           onInstallAll={() => void startInstallFlow("install_all")}

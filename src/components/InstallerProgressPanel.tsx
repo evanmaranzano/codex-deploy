@@ -2,6 +2,7 @@ import type { InstallerSnapshot } from "../lib/types";
 
 interface InstallerProgressPanelProps {
   snapshot: InstallerSnapshot;
+  hasInitializationError: boolean;
 }
 
 const STAGE_LABELS: Record<InstallerSnapshot["currentStage"], string> = {
@@ -18,7 +19,10 @@ const STAGE_LABELS: Record<InstallerSnapshot["currentStage"], string> = {
   failed: "安装失败"
 };
 
-export function InstallerProgressPanel({ snapshot }: InstallerProgressPanelProps) {
+export function InstallerProgressPanel({
+  snapshot,
+  hasInitializationError
+}: InstallerProgressPanelProps) {
   const progressValue = Math.max(0, Math.min(100, snapshot.progressPercent));
 
   return (
@@ -36,6 +40,9 @@ export function InstallerProgressPanel({ snapshot }: InstallerProgressPanelProps
       <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
         <div>
           <h2 style={{ margin: 0 }}>安装进度</h2>
+          {hasInitializationError ? (
+            <h2 style={{ margin: "8px 0 0", color: "#991b1b", fontSize: "1rem" }}>初始化失败</h2>
+          ) : null}
           <p style={{ margin: "8px 0 0", color: "#1d4ed8" }}>
             当前阶段：{STAGE_LABELS[snapshot.currentStage]}
           </p>

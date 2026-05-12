@@ -6,6 +6,7 @@ import type { InstallerSnapshot } from "../lib/types";
 interface InstallerPageProps {
   snapshot: InstallerSnapshot;
   isBusy: boolean;
+  hasInitializationError: boolean;
   onInstallClaude: () => void;
   onInstallCodex: () => void;
   onInstallAll: () => void;
@@ -16,12 +17,15 @@ interface InstallerPageProps {
 export function InstallerPage({
   snapshot,
   isBusy,
+  hasInitializationError,
   onInstallClaude,
   onInstallCodex,
   onInstallAll,
   onRetryStage,
   onRetryAll
 }: InstallerPageProps) {
+  const areInstallActionsDisabled = isBusy || hasInitializationError;
+
   return (
     <section style={{ display: "grid", gap: "24px" }}>
       <header>
@@ -30,7 +34,7 @@ export function InstallerPage({
           Windows 一键安装 Git、Node.js、CC Switch、Claude Code 和 Codex。
         </p>
       </header>
-      <InstallerProgressPanel snapshot={snapshot} />
+      <InstallerProgressPanel snapshot={snapshot} hasInitializationError={hasInitializationError} />
       <section style={{ display: "grid", gap: "12px" }}>
         <h2 style={{ margin: 0 }}>组件状态</h2>
         <div
@@ -46,13 +50,13 @@ export function InstallerPage({
         </div>
       </section>
       <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-        <button type="button" disabled={isBusy} onClick={onInstallClaude}>
+        <button type="button" disabled={areInstallActionsDisabled} onClick={onInstallClaude}>
           安装 Claude Code
         </button>
-        <button type="button" disabled={isBusy} onClick={onInstallCodex}>
+        <button type="button" disabled={areInstallActionsDisabled} onClick={onInstallCodex}>
           安装 Codex
         </button>
-        <button type="button" disabled={isBusy} onClick={onInstallAll}>
+        <button type="button" disabled={areInstallActionsDisabled} onClick={onInstallAll}>
           全部安装
         </button>
         <button
