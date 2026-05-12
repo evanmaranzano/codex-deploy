@@ -149,7 +149,7 @@ fn parses_manifest_json_and_finds_resource_by_component_id() {
             .resource("cc_switch")
             .expect("cc_switch resource should exist")
             .file_name,
-        "CC-Switch-Windows.msi"
+        "cc-switch/CC-Switch-v3.14.1-Windows.msi"
     );
 }
 
@@ -217,4 +217,42 @@ fn installer_service_returns_stage_names_for_requested_flow() {
             "Verify".to_string(),
         ]
     );
+}
+
+#[test]
+fn installer_service_builds_snapshot_updates_for_requested_flow() {
+    let service = InstallerService::production();
+    let snapshots = service
+        .snapshot_updates_for("install_codex")
+        .expect("snapshot updates should build");
+
+    assert_eq!(snapshots.len(), 8);
+    assert_eq!(snapshots[0].current_stage, crate::models::installer::InstallStageId::Preflight);
+    assert_eq!(snapshots[0].progress_percent, 12);
+    assert_eq!(
+        snapshots[5].current_stage,
+        crate::models::installer::InstallStageId::InstallCodex
+    );
+    assert_eq!(snapshots[5].progress_percent, 75);
+    assert_eq!(snapshots[7].current_stage, crate::models::installer::InstallStageId::Completed);
+    assert_eq!(snapshots[7].progress_percent, 100);
+    assert_eq!(snapshots[7].last_error, None);
+}
+
+#[test]
+fn installer_service_retries_from_failed_stage() {
+    let service = InstallerService::production();
+    let snapshots = service
+        .retry_snapshots_for_stage(crate::models::installer::InstallStageId::InstallCodex)
+        .expect("retry snapshots should build");
+
+    assert_eq!(snapshots.len(), 3);
+    assert_eq!(
+        snapshots[0].current_stage,
+        crate::models::installer::InstallStageId::InstallCodex
+    );
+    assert_eq!(snapshots[0].progress_percent, 33);
+    assert_eq!(snapshots[1].current_stage, crate::models::installer::InstallStageId::Verify);
+    assert_eq!(snapshots[2].current_stage, crate::models::installer::InstallStageId::Completed);
+    assert_eq!(snapshots[2].progress_percent, 100);
 }

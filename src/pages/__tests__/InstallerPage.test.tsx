@@ -128,3 +128,34 @@ test("renders failed retry state and initialization failure message", () => {
   expect(onRetryStage).not.toHaveBeenCalled();
   expect(onRetryAll).not.toHaveBeenCalled();
 });
+
+test("shows retry actions when the snapshot is failed", () => {
+  render(
+    <InstallerPage
+      snapshot={{
+        currentStage: "failed",
+        progressPercent: 65,
+        components: [],
+        logs: [
+          {
+            timestamp: "2026-05-12T10:00:00Z",
+            stage: "install_codex",
+            level: "error",
+            message: "npm install failed"
+          }
+        ],
+        lastError: "npm install failed"
+      }}
+      isBusy={false}
+      hasInitializationError={false}
+      onInstallClaude={vi.fn()}
+      onInstallCodex={vi.fn()}
+      onInstallAll={vi.fn()}
+      onRetryStage={vi.fn()}
+      onRetryAll={vi.fn()}
+    />
+  );
+
+  expect(screen.getByRole("button", { name: "重试当前阶段" })).toBeEnabled();
+  expect(screen.getByRole("button", { name: "重新执行全部安装" })).toBeEnabled();
+});
