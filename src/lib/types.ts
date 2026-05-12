@@ -74,3 +74,56 @@ export interface WritableAppSettings {
   defaultExportDir: string;
   requestTimeoutMs: number;
 }
+
+export type InstallerComponentId =
+  | "git"
+  | "nodejs"
+  | "cc_switch"
+  | "claude_code"
+  | "codex";
+
+export type InstallerComponentStatus =
+  | "not_installed"
+  | "checking"
+  | "installing"
+  | "installed"
+  | "failed"
+  | "skipped";
+
+export type InstallStageId =
+  | "idle"
+  | "preflight"
+  | "install_git"
+  | "install_node"
+  | "install_cc_switch"
+  | "refresh_environment"
+  | "install_claude_code"
+  | "install_codex"
+  | "verify"
+  | "completed"
+  | "failed";
+
+export type InstallFlowKind = "install_claude" | "install_codex" | "install_all";
+
+export interface InstallerComponentState {
+  id: InstallerComponentId;
+  label: string;
+  status: InstallerComponentStatus;
+  detail: string;
+  version: string | null;
+}
+
+export interface InstallerLogEntry {
+  timestamp: string;
+  stage: InstallStageId;
+  level: "info" | "warn" | "error";
+  message: string;
+}
+
+export interface InstallerSnapshot {
+  currentStage: InstallStageId;
+  progressPercent: number;
+  components: InstallerComponentState[];
+  logs: InstallerLogEntry[];
+  lastError: string | null;
+}
