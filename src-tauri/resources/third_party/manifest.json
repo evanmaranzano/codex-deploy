@@ -1,0 +1,25 @@
+{
+  "resources": [
+    {
+      "component_id": "git",
+      "version": "2.45.1",
+      "file_name": "Git-2.45.1-64-bit.exe",
+      "sha256": "REPLACE_WITH_REAL_SHA256",
+      "install_command": ["/VERYSILENT", "/NORESTART"]
+    },
+    {
+      "component_id": "nodejs",
+      "version": "22.9.0",
+      "file_name": "node-v22.9.0-x64.msi",
+      "sha256": "REPLACE_WITH_REAL_SHA256",
+      "install_command": ["/qn", "/norestart"]
+    },
+    {
+      "component_id": "cc_switch",
+      "version": "0.0.0",
+      "file_name": "CC-Switch-Windows.msi",
+      "sha256": "REPLACE_WITH_REAL_SHA256",
+      "install_command": ["/qn", "/norestart"]
+    }
+  ]
+}
