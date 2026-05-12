@@ -29,6 +29,10 @@ const EMPTY_SNAPSHOT: InstallerSnapshot = {
   lastError: null
 };
 
+function isBusyStage(stage: InstallerSnapshot["currentStage"]) {
+  return !["idle", "completed", "failed"].includes(stage);
+}
+
 export default function App() {
   const [snapshot, setSnapshot] = useState<InstallerSnapshot>(EMPTY_SNAPSHOT);
   const [isBusy, setIsBusy] = useState(false);
@@ -40,12 +44,13 @@ export default function App() {
     void loadInstallerSnapshot().then((value) => {
       if (mounted) {
         setSnapshot(value);
+        setIsBusy(isBusyStage(value.currentStage));
       }
     });
 
     void listenInstallerSnapshot((value) => {
       setSnapshot(value);
-      setIsBusy(!["idle", "completed", "failed"].includes(value.currentStage));
+      setIsBusy(isBusyStage(value.currentStage));
     }).then((dispose) => {
       unlisten = dispose;
     });
