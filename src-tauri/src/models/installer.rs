@@ -88,6 +88,7 @@ pub struct InstallerLogEntry {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct InstallerSnapshot {
     pub current_stage: InstallStageId,
     pub progress_percent: u8,
