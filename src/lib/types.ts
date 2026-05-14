@@ -77,9 +77,9 @@ export interface WritableAppSettings {
 
 export type InstallerComponentId =
   | "git"
+  | "python"
   | "nodejs"
   | "cc_switch"
-  | "claude_code"
   | "codex";
 
 export type InstallerComponentStatus =
@@ -94,16 +94,16 @@ export type InstallStageId =
   | "idle"
   | "preflight"
   | "install_git"
+  | "install_python"
   | "install_node"
   | "install_cc_switch"
   | "refresh_environment"
-  | "install_claude_code"
   | "install_codex"
   | "verify"
   | "completed"
   | "failed";
 
-export type InstallFlowKind = "install_claude" | "install_codex" | "install_all";
+export type InstallFlowKind = "install_codex" | "install_all";
 
 export interface InstallerComponentState {
   id: InstallerComponentId;

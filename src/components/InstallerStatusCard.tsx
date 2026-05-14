@@ -28,26 +28,46 @@ export function InstallerStatusCard({ component }: InstallerStatusCardProps) {
       aria-label={`${component.label} 状态`}
       style={{
         display: "grid",
-        gap: "10px",
-        padding: "16px",
-        borderRadius: "16px",
-        border: "1px solid #e2e8f0",
-        background: "#ffffff"
+        gap: "12px",
+        padding: "18px",
+        borderRadius: "18px",
+        border: "1px solid #dbe7f3",
+        background: "linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)",
+        minWidth: 0
       }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
-        <strong>{component.label}</strong>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: "12px"
+        }}
+      >
+        <strong style={{ fontSize: "1.05rem", lineHeight: 1.3 }}>{component.label}</strong>
         <span
           style={{
             color: STATUS_COLORS[component.status],
-            fontWeight: 700
+            fontWeight: 700,
+            flexShrink: 0,
+            textAlign: "right"
           }}
         >
           {STATUS_LABELS[component.status]}
         </span>
       </div>
-      <p style={{ margin: 0, color: "#475569" }}>{component.detail}</p>
-      <p style={{ margin: 0, color: "#64748b", fontSize: "0.95rem" }}>
+      <p
+        style={{
+          margin: 0,
+          color: "#334155",
+          lineHeight: 1.6,
+          overflowWrap: "anywhere",
+          wordBreak: "break-word"
+        }}
+      >
+        {component.detail}
+      </p>
+      <p style={{ margin: 0, color: "#64748b", fontSize: "0.92rem" }}>
         版本：{component.version ?? "未知"}
       </p>
     </article>

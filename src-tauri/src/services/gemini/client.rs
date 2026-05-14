@@ -183,9 +183,7 @@ struct SubtitleSegmentsEnvelope {
     segments: Vec<SubtitleSegment>,
 }
 
-fn build_generate_content_request(
-    request: &GeminiTransportRequest,
-) -> GenerateContentRequest {
+fn build_generate_content_request(request: &GeminiTransportRequest) -> GenerateContentRequest {
     let mut contents = request
         .history
         .iter()
@@ -445,14 +443,20 @@ impl ReqwestGeminiTransport {
         Ok(response_body)
     }
 
-    fn upload_file(&self, request: &GeminiSubtitleTransportRequest) -> Result<GeminiFileRecord, AppError> {
+    fn upload_file(
+        &self,
+        request: &GeminiSubtitleTransportRequest,
+    ) -> Result<GeminiFileRecord, AppError> {
         let client = self.build_client()?;
         let start_response = client
             .post("https://generativelanguage.googleapis.com/upload/v1beta/files")
             .header("x-goog-api-key", &self.api_key)
             .header("X-Goog-Upload-Protocol", "resumable")
             .header("X-Goog-Upload-Command", "start")
-            .header("X-Goog-Upload-Header-Content-Length", request.data.len().to_string())
+            .header(
+                "X-Goog-Upload-Header-Content-Length",
+                request.data.len().to_string(),
+            )
             .header("X-Goog-Upload-Header-Content-Type", &request.mime_type)
             .json(&serde_json::json!({
                 "file": {
@@ -692,13 +696,14 @@ impl GeminiSubtitleClient {
         request: SubtitleExtractionRequest,
         export_dir: &str,
     ) -> Result<TranscriptResult, AppError> {
-        self.transport.extract_subtitles(GeminiSubtitleTransportRequest {
-            model: request.model,
-            file_name: request.file_name,
-            mime_type: request.mime_type,
-            data: request.data,
-            export_dir: export_dir.to_string(),
-        })
+        self.transport
+            .extract_subtitles(GeminiSubtitleTransportRequest {
+                model: request.model,
+                file_name: request.file_name,
+                mime_type: request.mime_type,
+                data: request.data,
+                export_dir: export_dir.to_string(),
+            })
     }
 }
 
@@ -775,7 +780,10 @@ mod tests {
         assert_eq!(json["contents"][0]["parts"][0]["text"], "一只红色的猫");
         assert_eq!(json["generationConfig"]["responseModalities"][0], "TEXT");
         assert_eq!(json["generationConfig"]["responseModalities"][1], "IMAGE");
-        assert_eq!(json["generationConfig"]["responseFormat"]["image"]["aspectRatio"], "1:1");
+        assert_eq!(
+            json["generationConfig"]["responseFormat"]["image"]["aspectRatio"],
+            "1:1"
+        );
         assert_eq!(json["generationConfig"]["candidateCount"], 1);
     }
 
@@ -833,17 +841,26 @@ mod tests {
 
     #[test]
     fn builds_generate_subtitle_request_with_file_data_and_json_schema() {
-        let payload = build_generate_subtitle_request(
-            "Return subtitle JSON",
-            "files/abc-123",
-            "audio/wav",
-        );
+        let payload =
+            build_generate_subtitle_request("Return subtitle JSON", "files/abc-123", "audio/wav");
         let json = serde_json::to_value(&payload).unwrap();
 
-        assert_eq!(json["contents"][0]["parts"][0]["text"], "Return subtitle JSON");
-        assert_eq!(json["contents"][0]["parts"][1]["fileData"]["mimeType"], "audio/wav");
-        assert_eq!(json["contents"][0]["parts"][1]["fileData"]["fileUri"], "files/abc-123");
-        assert_eq!(json["generationConfig"]["responseMimeType"], "application/json");
+        assert_eq!(
+            json["contents"][0]["parts"][0]["text"],
+            "Return subtitle JSON"
+        );
+        assert_eq!(
+            json["contents"][0]["parts"][1]["fileData"]["mimeType"],
+            "audio/wav"
+        );
+        assert_eq!(
+            json["contents"][0]["parts"][1]["fileData"]["fileUri"],
+            "files/abc-123"
+        );
+        assert_eq!(
+            json["generationConfig"]["responseMimeType"],
+            "application/json"
+        );
         assert_eq!(
             json["generationConfig"]["responseSchema"]["propertyOrdering"][0],
             "segments"

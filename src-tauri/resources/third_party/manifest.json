@@ -2,23 +2,30 @@
   "resources": [
     {
       "component_id": "git",
-      "version": "2.45.1",
-      "file_name": "Git-2.45.1-64-bit.exe",
-      "sha256": "REPLACE_WITH_REAL_SHA256",
+      "version": "2.54.0",
+      "file_name": "git/Git-2.54.0-64-bit.exe",
+      "sha256": "2b96e7854f0520f0f6b709c21041d9801b1be44d5e1a0d9fa621b2fbc40f1983",
       "install_command": ["/VERYSILENT", "/NORESTART"]
     },
     {
+      "component_id": "python",
+      "version": "3.12.10",
+      "file_name": "python/python-3.12.10-amd64.exe",
+      "sha256": "67b5635e80ea51072b87941312d00ec8927c4db9ba18938f7ad2d27b328b95fb",
+      "install_command": ["/quiet", "InstallAllUsers=1", "PrependPath=1", "Include_test=0"]
+    },
+    {
       "component_id": "nodejs",
-      "version": "22.9.0",
-      "file_name": "node-v22.9.0-x64.msi",
-      "sha256": "REPLACE_WITH_REAL_SHA256",
+      "version": "24.15.0",
+      "file_name": "node/node-v24.15.0-x64.msi",
+      "sha256": "feffb8e5cb5ac47f793666636d496ef3e975be82c84c4da5d20e6aa8fa4eb806",
       "install_command": ["/qn", "/norestart"]
     },
     {
       "component_id": "cc_switch",
-      "version": "0.0.0",
-      "file_name": "CC-Switch-Windows.msi",
-      "sha256": "REPLACE_WITH_REAL_SHA256",
+      "version": "3.14.1",
+      "file_name": "cc-switch/CC-Switch-v3.14.1-Windows.msi",
+      "sha256": "82131ae0fb57dbea5ab8d1b67c67408e0fdf6b5b5c9136e7061aebaba7a4bc1b",
       "install_command": ["/qn", "/norestart"]
     }
   ]

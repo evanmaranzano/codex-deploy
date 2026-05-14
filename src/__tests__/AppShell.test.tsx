@@ -10,6 +10,7 @@ vi.mock("../lib/installer", () => ({
     logs: [],
     lastError: null
   }),
+  refreshInstallerSnapshot: vi.fn(),
   listenInstallerSnapshot: vi.fn().mockResolvedValue(() => undefined),
   retryCurrentStage: vi.fn(),
   retryInstallAll: vi.fn(),
@@ -42,7 +43,7 @@ test("disables install actions when the initial snapshot is already running", as
 
   expect(await screen.findByRole("heading", { name: "AI Dev Installer", level: 1 })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "全部安装" })).toBeDisabled();
-  expect(screen.getByRole("button", { name: "安装 Claude Code" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "安装 Codex" })).toBeDisabled();
   expect(screen.getByText("当前阶段：执行安装前检查")).toBeInTheDocument();
 });
 

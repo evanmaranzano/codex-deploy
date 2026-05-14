@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   loadInstallerSnapshot,
   listenInstallerSnapshot,
+  refreshInstallerSnapshot,
   retryCurrentStage,
   retryInstallAll,
   startInstallFlow
@@ -14,15 +15,9 @@ const EMPTY_SNAPSHOT: InstallerSnapshot = {
   progressPercent: 0,
   components: [
     { id: "git", label: "Git", status: "checking", detail: "等待检测", version: null },
+    { id: "python", label: "Python", status: "checking", detail: "等待检测", version: null },
     { id: "nodejs", label: "Node.js", status: "checking", detail: "等待检测", version: null },
     { id: "cc_switch", label: "CC Switch", status: "checking", detail: "等待检测", version: null },
-    {
-      id: "claude_code",
-      label: "Claude Code",
-      status: "checking",
-      detail: "等待检测",
-      version: null
-    },
     { id: "codex", label: "Codex", status: "checking", detail: "等待检测", version: null }
   ],
   logs: [],
@@ -33,8 +28,33 @@ function isBusyStage(stage: InstallerSnapshot["currentStage"]) {
   return !["idle", "completed", "failed"].includes(stage);
 }
 
+function buildTimestamp() {
+  return new Date().toLocaleTimeString("zh-CN", { hour12: false });
+}
+
 function toErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : String(error);
+}
+
+function createQueuedFlowSnapshot(
+  snapshot: InstallerSnapshot,
+  message: string
+): InstallerSnapshot {
+  return {
+    ...snapshot,
+    currentStage: "preflight",
+    progressPercent: Math.max(snapshot.progressPercent, 1),
+    lastError: null,
+    logs: [
+      ...snapshot.logs,
+      {
+        timestamp: buildTimestamp(),
+        stage: "preflight",
+        level: "info",
+        message
+      }
+    ]
+  };
 }
 
 function createInitializationFailureSnapshot(message: string): InstallerSnapshot {
@@ -62,6 +82,7 @@ export default function App() {
   const [snapshot, setSnapshot] = useState<InstallerSnapshot>(EMPTY_SNAPSHOT);
   const [isBusy, setIsBusy] = useState(false);
   const [hasInitializationError, setHasInitializationError] = useState(false);
+  const [isRefreshingSnapshot, setIsRefreshingSnapshot] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -111,6 +132,130 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!isBusy || hasInitializationError) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      void loadInstallerSnapshot()
+        .then((value) => {
+          setSnapshot(value);
+          setIsBusy(isBusyStage(value.currentStage));
+          setHasInitializationError(false);
+        })
+        .catch(() => {
+          // Ignore transient polling failures while the installer flow is still running.
+        });
+    }, 3000);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [isBusy, hasInitializationError]);
+
+  const handleRefreshSnapshot = () => {
+    setIsRefreshingSnapshot(true);
+    void refreshInstallerSnapshot()
+      .then((value) => {
+        setSnapshot(value);
+        setIsBusy(isBusyStage(value.currentStage));
+        setHasInitializationError(false);
+      })
+      .catch((error: unknown) => {
+        setSnapshot(createInitializationFailureSnapshot(`初始化失败：无法重新检测环境。${toErrorMessage(error)}`));
+        setIsBusy(false);
+        setHasInitializationError(true);
+      })
+      .finally(() => {
+        setIsRefreshingSnapshot(false);
+      });
+  };
+
+  const handleFlowStart = (flow: "install_codex" | "install_all") => {
+    const queuedMessage =
+      flow === "install_all"
+        ? "已提交全部安装请求，正在准备安装环境..."
+        : "已提交 Codex 安装请求，正在准备安装环境...";
+
+    setSnapshot((current) => createQueuedFlowSnapshot(current, queuedMessage));
+    setIsBusy(true);
+    setHasInitializationError(false);
+
+    void startInstallFlow(flow).catch((error: unknown) => {
+      const message = `启动安装失败：${toErrorMessage(error)}`;
+      setSnapshot((current) => ({
+        ...current,
+        currentStage: "failed",
+        lastError: message,
+        logs: [
+          ...current.logs,
+          {
+            timestamp: buildTimestamp(),
+            stage: "failed",
+            level: "error",
+            message
+          }
+        ]
+      }));
+      setIsBusy(false);
+    });
+  };
+
+  const handleRetryCurrentStage = () => {
+    setSnapshot((current) =>
+      createQueuedFlowSnapshot(current, "已提交重试请求，正在重新进入当前阶段...")
+    );
+    setIsBusy(true);
+    setHasInitializationError(false);
+
+    void retryCurrentStage().catch((error: unknown) => {
+      const message = `重试当前阶段失败：${toErrorMessage(error)}`;
+      setSnapshot((current) => ({
+        ...current,
+        currentStage: "failed",
+        lastError: message,
+        logs: [
+          ...current.logs,
+          {
+            timestamp: buildTimestamp(),
+            stage: "failed",
+            level: "error",
+            message
+          }
+        ]
+      }));
+      setIsBusy(false);
+    });
+  };
+
+  const handleRetryAll = () => {
+    setSnapshot((current) =>
+      createQueuedFlowSnapshot(current, "已提交全部重试请求，正在重新准备安装流程...")
+    );
+    setIsBusy(true);
+    setHasInitializationError(false);
+
+    void retryInstallAll().catch((error: unknown) => {
+      const message = `重新执行全部安装失败：${toErrorMessage(error)}`;
+      setSnapshot((current) => ({
+        ...current,
+        currentStage: "failed",
+        lastError: message,
+        logs: [
+          ...current.logs,
+          {
+            timestamp: buildTimestamp(),
+            stage: "failed",
+            level: "error",
+            message
+          }
+        ]
+      }));
+      setIsBusy(false);
+    });
+  };
+
   return (
     <main
       style={{
@@ -134,12 +279,13 @@ export default function App() {
         <InstallerPage
           snapshot={snapshot}
           isBusy={isBusy}
+          isRefreshingSnapshot={isRefreshingSnapshot}
           hasInitializationError={hasInitializationError}
-          onInstallClaude={() => void startInstallFlow("install_claude")}
-          onInstallCodex={() => void startInstallFlow("install_codex")}
-          onInstallAll={() => void startInstallFlow("install_all")}
-          onRetryStage={() => void retryCurrentStage()}
-          onRetryAll={() => void retryInstallAll()}
+          onInstallCodex={() => handleFlowStart("install_codex")}
+          onInstallAll={() => handleFlowStart("install_all")}
+          onRefreshSnapshot={handleRefreshSnapshot}
+          onRetryStage={handleRetryCurrentStage}
+          onRetryAll={handleRetryAll}
         />
       </div>
     </main>

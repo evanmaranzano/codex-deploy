@@ -36,6 +36,7 @@ pub fn run() {
             commands::history::list_chat_history,
             commands::image::generate_image,
             commands::installer::load_installer_snapshot,
+            commands::installer::refresh_installer_snapshot,
             commands::installer::start_install_flow,
             commands::installer::retry_current_install_stage,
             commands::installer::retry_install_all,

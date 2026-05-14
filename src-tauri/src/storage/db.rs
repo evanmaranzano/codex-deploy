@@ -33,11 +33,13 @@ impl HistoryDatabase {
             details: Some(error.to_string()),
         })?;
 
-        connection.execute_batch(MIGRATION_SQL).map_err(|error| AppError {
-            code: "history_db_migration_failed".to_string(),
-            message: "Failed to apply history database migration".to_string(),
-            details: Some(error.to_string()),
-        })?;
+        connection
+            .execute_batch(MIGRATION_SQL)
+            .map_err(|error| AppError {
+                code: "history_db_migration_failed".to_string(),
+                message: "Failed to apply history database migration".to_string(),
+                details: Some(error.to_string()),
+            })?;
 
         Ok(Self { connection })
     }
@@ -49,11 +51,13 @@ impl HistoryDatabase {
             details: Some(error.to_string()),
         })?;
 
-        connection.execute_batch(MIGRATION_SQL).map_err(|error| AppError {
-            code: "history_db_migration_failed".to_string(),
-            message: "Failed to apply history database migration".to_string(),
-            details: Some(error.to_string()),
-        })?;
+        connection
+            .execute_batch(MIGRATION_SQL)
+            .map_err(|error| AppError {
+                code: "history_db_migration_failed".to_string(),
+                message: "Failed to apply history database migration".to_string(),
+                details: Some(error.to_string()),
+            })?;
 
         Ok(Self { connection })
     }

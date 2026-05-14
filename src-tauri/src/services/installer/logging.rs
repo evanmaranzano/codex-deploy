@@ -27,7 +27,11 @@ impl SessionLogWriter {
             .append(true)
             .open(&self.jsonl_path)?;
 
-        writeln!(text, "[{}][{:?}] {}", entry.timestamp, entry.stage, entry.message)?;
+        writeln!(
+            text,
+            "[{}][{:?}] {}",
+            entry.timestamp, entry.stage, entry.message
+        )?;
         let json = serde_json::to_string(entry)
             .map_err(|error| Error::other(format!("failed to serialize log entry: {error}")))?;
         writeln!(jsonl, "{json}")?;

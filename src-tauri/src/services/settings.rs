@@ -302,9 +302,9 @@ impl SettingsService {
                         code: "settings_recovery_failed".to_string(),
                         message: "Failed to recover app settings".to_string(),
                         details: Some(
-                            error
-                                .details
-                                .unwrap_or_else(|| "Temporary settings file was invalid".to_string()),
+                            error.details.unwrap_or_else(|| {
+                                "Temporary settings file was invalid".to_string()
+                            }),
                         ),
                     });
                 }

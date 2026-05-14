@@ -6,6 +6,7 @@ import { InstallerPage } from "../InstallerPage";
 test("renders installer progress, component states, and logs", async () => {
   const user = userEvent.setup();
   const onInstallAll = vi.fn();
+  const onRefreshSnapshot = vi.fn();
 
   render(
     <InstallerPage
@@ -14,6 +15,13 @@ test("renders installer progress, component states, and logs", async () => {
         progressPercent: 72,
         components: [
           { id: "git", label: "Git", status: "installed", detail: "已检测到 Git", version: "2.45.1" },
+          {
+            id: "python",
+            label: "Python",
+            status: "installed",
+            detail: "Python 已安装",
+            version: "Python 3.12.10"
+          },
           {
             id: "nodejs",
             label: "Node.js",
@@ -27,13 +35,6 @@ test("renders installer progress, component states, and logs", async () => {
             status: "installed",
             detail: "CC Switch 已安装",
             version: "1.2.0"
-          },
-          {
-            id: "claude_code",
-            label: "Claude Code",
-            status: "installed",
-            detail: "Claude Code 已安装",
-            version: "0.9.0"
           },
           {
             id: "codex",
@@ -55,16 +56,17 @@ test("renders installer progress, component states, and logs", async () => {
       }}
       isBusy={false}
       hasInitializationError={false}
-      onInstallClaude={vi.fn()}
+      isRefreshingSnapshot={false}
       onInstallCodex={vi.fn()}
       onInstallAll={onInstallAll}
+      onRefreshSnapshot={onRefreshSnapshot}
       onRetryStage={vi.fn()}
       onRetryAll={vi.fn()}
     />
   );
 
   expect(screen.getByRole("heading", { name: "AI Dev Installer", level: 1 })).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "安装 Claude Code" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "重新检测环境" })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "安装 Codex" })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "全部安装" })).toBeInTheDocument();
   expect(screen.getByRole("heading", { name: "状态日志", level: 2 })).toBeInTheDocument();
@@ -78,6 +80,8 @@ test("renders installer progress, component states, and logs", async () => {
 
   await user.click(screen.getByRole("button", { name: "全部安装" }));
   expect(onInstallAll).toHaveBeenCalledTimes(1);
+  await user.click(screen.getByRole("button", { name: "重新检测环境" }));
+  expect(onRefreshSnapshot).toHaveBeenCalledTimes(1);
 });
 
 test("renders failed retry state and initialization failure message", () => {
@@ -110,9 +114,10 @@ test("renders failed retry state and initialization failure message", () => {
       }}
       isBusy={false}
       hasInitializationError
-      onInstallClaude={vi.fn()}
+      isRefreshingSnapshot={false}
       onInstallCodex={vi.fn()}
       onInstallAll={vi.fn()}
+      onRefreshSnapshot={vi.fn()}
       onRetryStage={onRetryStage}
       onRetryAll={onRetryAll}
     />
@@ -120,7 +125,6 @@ test("renders failed retry state and initialization failure message", () => {
 
   expect(screen.getByRole("heading", { name: "初始化失败", level: 2 })).toBeInTheDocument();
   expect(screen.getByRole("alert")).toHaveTextContent("初始化失败：loadInstallerSnapshot 调用失败");
-  expect(screen.getByRole("button", { name: "安装 Claude Code" })).toBeDisabled();
   expect(screen.getByRole("button", { name: "安装 Codex" })).toBeDisabled();
   expect(screen.getByRole("button", { name: "全部安装" })).toBeDisabled();
   expect(screen.getByRole("button", { name: "重试当前阶段" })).toBeEnabled();
@@ -148,9 +152,10 @@ test("shows retry actions when the snapshot is failed", () => {
       }}
       isBusy={false}
       hasInitializationError={false}
-      onInstallClaude={vi.fn()}
+      isRefreshingSnapshot={false}
       onInstallCodex={vi.fn()}
       onInstallAll={vi.fn()}
+      onRefreshSnapshot={vi.fn()}
       onRetryStage={vi.fn()}
       onRetryAll={vi.fn()}
     />

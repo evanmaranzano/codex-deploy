@@ -6,6 +6,10 @@ export function loadInstallerSnapshot(): Promise<InstallerSnapshot> {
   return tauriInvoke<InstallerSnapshot>("load_installer_snapshot");
 }
 
+export function refreshInstallerSnapshot(): Promise<InstallerSnapshot> {
+  return tauriInvoke<InstallerSnapshot>("refresh_installer_snapshot");
+}
+
 export function startInstallFlow(flow: InstallFlowKind): Promise<void> {
   return tauriInvoke("start_install_flow", { flow });
 }

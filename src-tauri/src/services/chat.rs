@@ -20,9 +20,7 @@ impl ChatService {
     }
 
     pub fn production(api_key: String, timeout_ms: u64) -> Self {
-        Self::new(Box::new(GeminiChatClient::production(
-            api_key, timeout_ms,
-        )))
+        Self::new(Box::new(GeminiChatClient::production(api_key, timeout_ms)))
     }
 
     pub fn send(&self, request: ChatRequest) -> Result<ChatResponse, AppError> {
@@ -34,7 +32,10 @@ impl ChatService {
             });
         }
 
-        self.client
-            .chat_generate(request.model, request.prompt.trim().to_string(), request.history)
+        self.client.chat_generate(
+            request.model,
+            request.prompt.trim().to_string(),
+            request.history,
+        )
     }
 }
