@@ -581,7 +581,7 @@ impl InstallerService {
         let output = process.output().map_err(|error| AppError {
                 code: "installer_command_spawn_failed".into(),
                 message: if stage == InstallStageId::InstallCodex && is_winget_command(command) {
-                    "Failed to start winget. Please install or repair Microsoft App Installer, then reopen AI Dev Installer.".into()
+                    "Failed to start winget. Please install or repair Microsoft App Installer, then reopen Codex Deploy.".into()
                 } else {
                     format!("Failed to start {}", command.program)
                 },

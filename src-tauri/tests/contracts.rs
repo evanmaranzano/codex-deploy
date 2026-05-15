@@ -1,5 +1,5 @@
-use molspark_desktop::error::AppError;
-use molspark_desktop::models::{
+use codex_deploy::error::AppError;
+use codex_deploy::models::{
     ApiKeyStatus, AppSettings, ChatMessage, ChatRole, ExportArtifact, ExportArtifactKind,
     GeminiModelOption, GeneratedImage, ImageGenerationResponse, SettingsConnectionResult,
     SubtitleSegment, TranscriptResult, WritableAppSettings,

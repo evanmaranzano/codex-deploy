@@ -1,5 +1,5 @@
-use molspark_desktop::storage::db::HistoryDatabase;
-use molspark_desktop::storage::history::DEFAULT_SESSION_ID;
+use codex_deploy::storage::db::HistoryDatabase;
+use codex_deploy::storage::history::DEFAULT_SESSION_ID;
 
 #[test]
 fn inserts_and_reads_chat_history_rows() {

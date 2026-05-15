@@ -94,7 +94,7 @@ export function InstallerPage({
           </span>
           <div style={{ display: "grid", gap: "10px" }}>
             <h1 style={{ margin: 0, color: "#f8fafc", fontSize: "clamp(2rem, 4vw, 3.4rem)" }}>
-              AI Dev Installer
+              Codex Deploy
             </h1>
             <p
               style={{
@@ -104,7 +104,7 @@ export function InstallerPage({
                 lineHeight: 1.7
               }}
             >
-              面向 Windows 的 Codex 环境安装器，一键准备 Git、Python、Node.js、CC Switch 与
+              面向 Windows 的 Codex 一键部署器，一次准备 Git、Python、Node.js、CC Switch 与
               Codex 所需基础环境。
             </p>
           </div>

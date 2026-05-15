@@ -49,5 +49,5 @@ pub fn run() {
             commands::subtitles::extract_subtitles
         ])
         .run(tauri::generate_context!())
-        .expect("failed to run AI Dev Installer");
+        .expect("failed to run Codex Deploy");
 }

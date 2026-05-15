@@ -65,7 +65,7 @@ test("renders installer progress, component states, and logs", async () => {
     />
   );
 
-  expect(screen.getByRole("heading", { name: "AI Dev Installer", level: 1 })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "Codex Deploy", level: 1 })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "重新检测环境" })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "安装 Codex" })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "全部安装" })).toBeInTheDocument();

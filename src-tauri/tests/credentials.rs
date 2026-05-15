@@ -1,11 +1,11 @@
 use std::path::PathBuf;
 
-use molspark_desktop::models::ApiKeyStatus;
-use molspark_desktop::services::credentials::{CredentialStore, MemorySecretBackend};
-use molspark_desktop::services::settings::{GeminiConnectivityClient, SettingsService};
+use codex_deploy::models::ApiKeyStatus;
+use codex_deploy::services::credentials::{CredentialStore, MemorySecretBackend};
+use codex_deploy::services::settings::{GeminiConnectivityClient, SettingsService};
 
-use molspark_desktop::error::AppError;
-use molspark_desktop::models::{GeminiModelOption, WritableAppSettings};
+use codex_deploy::error::AppError;
+use codex_deploy::models::{GeminiModelOption, WritableAppSettings};
 
 #[test]
 fn saves_reads_and_clears_api_key_status_without_leaking_secret() {
@@ -87,7 +87,7 @@ impl GeminiConnectivityClient for FakeGeminiConnectivityClient {
 
 #[test]
 fn saves_and_loads_non_sensitive_app_settings_separately_from_api_key() {
-    let settings_path = std::env::temp_dir().join("molspark-settings-test.json");
+    let settings_path = std::env::temp_dir().join("codex-deploy-settings-test.json");
     let _ = std::fs::remove_file(&settings_path);
 
     let service = SettingsService::new(
@@ -120,7 +120,7 @@ fn saves_and_loads_non_sensitive_app_settings_separately_from_api_key() {
 
 #[test]
 fn tests_api_key_connection_through_injected_client() {
-    let settings_path = std::env::temp_dir().join("molspark-connection-test.json");
+    let settings_path = std::env::temp_dir().join("codex-deploy-connection-test.json");
     let _ = std::fs::remove_file(&settings_path);
 
     let backend = MemorySecretBackend::default();
@@ -142,7 +142,7 @@ fn tests_api_key_connection_through_injected_client() {
 
 #[test]
 fn returns_connectivity_client_failure_result() {
-    let settings_path = std::env::temp_dir().join("molspark-connection-failure-test.json");
+    let settings_path = std::env::temp_dir().join("codex-deploy-connection-failure-test.json");
     let _ = std::fs::remove_file(&settings_path);
 
     let backend = MemorySecretBackend::default();
@@ -163,7 +163,7 @@ fn returns_connectivity_client_failure_result() {
 
 #[test]
 fn lists_available_models_through_injected_client() {
-    let settings_path = std::env::temp_dir().join("molspark-model-list-test.json");
+    let settings_path = std::env::temp_dir().join("codex-deploy-model-list-test.json");
     let _ = std::fs::remove_file(&settings_path);
 
     let backend = MemorySecretBackend::default();
@@ -185,7 +185,7 @@ fn lists_available_models_through_injected_client() {
 
 #[test]
 fn recovers_settings_from_temp_file_when_primary_is_missing() {
-    let base_dir = std::env::temp_dir().join("molspark-settings-recover-from-new");
+    let base_dir = std::env::temp_dir().join("codex-deploy-settings-recover-from-new");
     let _ = std::fs::remove_dir_all(&base_dir);
     std::fs::create_dir_all(&base_dir).unwrap();
 
@@ -217,7 +217,7 @@ fn recovers_settings_from_temp_file_when_primary_is_missing() {
 
 #[test]
 fn recovers_settings_from_backup_when_primary_is_missing() {
-    let base_dir = std::env::temp_dir().join("molspark-settings-recover-from-bak");
+    let base_dir = std::env::temp_dir().join("codex-deploy-settings-recover-from-bak");
     let _ = std::fs::remove_dir_all(&base_dir);
     std::fs::create_dir_all(&base_dir).unwrap();
 
@@ -249,7 +249,7 @@ fn recovers_settings_from_backup_when_primary_is_missing() {
 
 #[test]
 fn prefers_temp_settings_over_backup_when_both_exist() {
-    let base_dir = std::env::temp_dir().join("molspark-settings-recover-prefer-new");
+    let base_dir = std::env::temp_dir().join("codex-deploy-settings-recover-prefer-new");
     let _ = std::fs::remove_dir_all(&base_dir);
     std::fs::create_dir_all(&base_dir).unwrap();
 
@@ -288,7 +288,7 @@ fn prefers_temp_settings_over_backup_when_both_exist() {
 
 #[test]
 fn falls_back_to_backup_when_temp_settings_are_invalid() {
-    let base_dir = std::env::temp_dir().join("molspark-settings-recover-invalid-new");
+    let base_dir = std::env::temp_dir().join("codex-deploy-settings-recover-invalid-new");
     let _ = std::fs::remove_dir_all(&base_dir);
     std::fs::create_dir_all(&base_dir).unwrap();
 

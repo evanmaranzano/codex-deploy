@@ -25,7 +25,7 @@ const mockedListenInstallerSnapshot = vi.mocked(listenInstallerSnapshot);
 
 test("renders the installer shell by default", async () => {
   render(<App />);
-  expect(await screen.findByRole("heading", { name: "AI Dev Installer", level: 1 })).toBeInTheDocument();
+  expect(await screen.findByRole("heading", { name: "Codex Deploy", level: 1 })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "全部安装" })).toBeInTheDocument();
   expect(screen.getByText("当前阶段：等待执行")).toBeInTheDocument();
 });
@@ -41,7 +41,7 @@ test("disables install actions when the initial snapshot is already running", as
 
   render(<App />);
 
-  expect(await screen.findByRole("heading", { name: "AI Dev Installer", level: 1 })).toBeInTheDocument();
+  expect(await screen.findByRole("heading", { name: "Codex Deploy", level: 1 })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "全部安装" })).toBeDisabled();
   expect(screen.getByRole("button", { name: "安装 Codex" })).toBeDisabled();
   expect(screen.getByText("当前阶段：执行安装前检查")).toBeInTheDocument();

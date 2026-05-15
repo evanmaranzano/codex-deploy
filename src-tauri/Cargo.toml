@@ -1,14 +1,14 @@
 [package]
-name = "molspark_desktop"
+name = "codex_deploy"
 version = "0.1.0"
 edition = "2021"
 
 [lib]
-name = "molspark_desktop"
+name = "codex_deploy"
 path = "src/lib.rs"
 
 [[bin]]
-name = "molspark_desktop"
+name = "codex_deploy"
 path = "src/main.rs"
 
 [dependencies]

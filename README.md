@@ -1,10 +1,10 @@
-# AI Dev Installer
+# Codex Deploy
 
 一个基于 [Tauri 2](https://v2.tauri.app/) 的 Windows 桌面应用，用于一键准备 Codex 所需的基础开发环境。
 
 ## 它会帮你做什么
 
-`AI Dev Installer` 会检查并安装以下组件：
+`Codex Deploy` 会检查并安装以下组件：
 
 | 组件 | 版本 | 说明 |
 |------|------|------|
@@ -20,18 +20,18 @@
 
 ### 下载安装
 
-1. 从 Releases 下载 `AI Dev Installer_0.1.0_x64-setup.exe`
+1. 从 Releases 下载 `Codex Deploy_0.1.0_x64-setup.exe`
 2. 双击运行安装包，按向导提示完成安装
-3. 安装完成后 `AI Dev Installer` 会自动打开
+3. 安装完成后 `Codex Deploy` 会自动打开
 
 ### 使用
 
-1. 打开 `AI Dev Installer`
+1. 打开 `Codex Deploy`
 2. 点击 **重新检测环境**，检查已安装的组件
 3. 点击 **全部安装**，一键安装所有缺失组件
 4. 等待安装完成，确认 `Codex` 显示为 `已安装`
 
-> 详细安装教程请参考 [安装说明](docs/ai-dev-installer-安装说明.md)
+> 详细安装教程请参考 [安装说明](docs/codex-deploy-安装说明.md)
 
 ## 系统要求
 

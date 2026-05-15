@@ -377,7 +377,7 @@ fn strips_windows_extended_path_prefix_for_msi_installs() {
         "nodejs",
         "node/node-v24.15.0-x64.msi",
         &["/qn".into(), "/norestart".into()],
-        Path::new(r"\\?\C:\Users\HUAWEI\AppData\Local\AI Dev Installer\resources\third_party"),
+        Path::new(r"\\?\C:\Users\HUAWEI\AppData\Local\Codex Deploy\resources\third_party"),
     )
     .expect("msi command should build from extended-length path");
 
@@ -386,7 +386,7 @@ fn strips_windows_extended_path_prefix_for_msi_installs() {
         command.args,
         vec![
             "/i".to_string(),
-            r"C:\Users\HUAWEI\AppData\Local\AI Dev Installer\resources\third_party\node\node-v24.15.0-x64.msi".to_string(),
+            r"C:\Users\HUAWEI\AppData\Local\Codex Deploy\resources\third_party\node\node-v24.15.0-x64.msi".to_string(),
             "/qn".to_string(),
             "/norestart".to_string()
         ]

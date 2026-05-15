@@ -1,5 +1,5 @@
-use molspark_desktop::models::SubtitleSegment;
-use molspark_desktop::services::srt::render_srt;
+use codex_deploy::models::SubtitleSegment;
+use codex_deploy::services::srt::render_srt;
 
 #[test]
 fn renders_srt_with_correct_timestamp_format() {

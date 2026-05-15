@@ -1,6 +1,6 @@
-use molspark_desktop::error::AppError;
-use molspark_desktop::models::{GeneratedImage, ImageGenerationResponse};
-use molspark_desktop::services::image::{ImageRequest, ImageService};
+use codex_deploy::error::AppError;
+use codex_deploy::models::{GeneratedImage, ImageGenerationResponse};
+use codex_deploy::services::image::{ImageRequest, ImageService};
 
 struct FakeImageClient {
     response: ImageGenerationResponse,
@@ -12,7 +12,7 @@ impl FakeImageClient {
     }
 }
 
-impl molspark_desktop::services::image::GeminiImageClientLike for FakeImageClient {
+impl codex_deploy::services::image::GeminiImageClientLike for FakeImageClient {
     fn generate_image(&self, _request: ImageRequest) -> Result<ImageGenerationResponse, AppError> {
         Ok(self.response.clone())
     }

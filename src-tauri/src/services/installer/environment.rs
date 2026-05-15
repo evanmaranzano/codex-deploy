@@ -1,3 +1,6 @@
+use std::collections::HashSet;
+use std::ffi::OsString;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use crate::models::installer::{
@@ -33,9 +36,11 @@ impl EnvironmentProbe for DetectExecutionEnvironment {
     }
 
     fn detect_binary(&self, command: &str) -> Option<DetectedBinary> {
-        let path = detect_path(command);
-        let version = match command {
-            "cc-switch" | "cc-switch.exe" => None,
+        let path = detect_path(command)
+            .or_else(|| detect_known_binary_path(command).map(|path| path.display().to_string()));
+        let version = match (command, path.as_deref()) {
+            ("cc-switch" | "cc-switch.exe", _) => None,
+            (_, Some(path)) => detect_version(path),
             _ => detect_version(command),
         };
 
@@ -298,6 +303,48 @@ fn detect_version(command: &str) -> Option<String> {
     first_non_empty_output_line(output)
 }
 
+fn detect_known_binary_path(command: &str) -> Option<PathBuf> {
+    known_binary_candidates(command)
+        .into_iter()
+        .find(|path| path.exists())
+}
+
+fn known_binary_candidates(command: &str) -> Vec<PathBuf> {
+    let normalized = command.to_ascii_lowercase();
+    let mut candidates = Vec::new();
+
+    match normalized.as_str() {
+        "git" | "git.exe" => {
+            push_program_files_candidates(&mut candidates, &[r"Git\cmd\git.exe", r"Git\bin\git.exe"]);
+        }
+        "node" | "node.exe" => {
+            push_program_files_candidates(&mut candidates, &[r"nodejs\node.exe"]);
+        }
+        "npm" | "npm.cmd" | "npm.exe" => {
+            push_program_files_candidates(&mut candidates, &[r"nodejs\npm.cmd"]);
+        }
+        _ => {}
+    }
+
+    candidates
+}
+
+fn push_program_files_candidates(candidates: &mut Vec<PathBuf>, relative_paths: &[&str]) {
+    for env_name in ["ProgramFiles", "ProgramFiles(x86)", "LOCALAPPDATA"] {
+        if let Some(base) = std::env::var_os(env_name) {
+            for relative_path in relative_paths {
+                candidates.push(PathBuf::from(&base).join(relative_path));
+            }
+        }
+    }
+
+    for base in [r"C:\Program Files", r"C:\Program Files (x86)"] {
+        for relative_path in relative_paths {
+            candidates.push(Path::new(base).join(relative_path));
+        }
+    }
+}
+
 fn detect_appx_package(package_name: &str) -> Option<DetectedBinary> {
     let script = format!(
         "(Get-AppxPackage -Name '{package_name}' -ErrorAction SilentlyContinue | Select-Object -First 1 | ForEach-Object {{ \"{{0}}|{{1}}\" -f $_.Version, $_.InstallLocation }})"
@@ -332,10 +379,138 @@ fn detect_appx_package(package_name: &str) -> Option<DetectedBinary> {
 fn command_output(program: &str, args: &[&str]) -> std::io::Result<std::process::Output> {
     let mut command = Command::new(program);
     command.args(args);
+    if let Some(path) = refreshed_path_env() {
+        command.env("PATH", path);
+    }
     #[cfg(target_os = "windows")]
     {
         command.creation_flags(CREATE_NO_WINDOW);
     }
+    command.output()
+}
+
+fn refreshed_path_env() -> Option<OsString> {
+    let mut entries = Vec::new();
+    let mut seen = HashSet::new();
+
+    append_path_entries(std::env::var_os("PATH"), &mut entries, &mut seen);
+
+    #[cfg(target_os = "windows")]
+    {
+        for value in registry_path_values() {
+            append_path_entries(Some(value), &mut entries, &mut seen);
+        }
+        for path in known_path_entries() {
+            push_unique_path(path, &mut entries, &mut seen);
+        }
+    }
+
+    std::env::join_paths(entries).ok()
+}
+
+fn append_path_entries(
+    value: Option<OsString>,
+    entries: &mut Vec<PathBuf>,
+    seen: &mut HashSet<String>,
+) {
+    let Some(value) = value else {
+        return;
+    };
+
+    for path in std::env::split_paths(&value) {
+        push_unique_path(path, entries, seen);
+    }
+}
+
+fn push_unique_path(path: PathBuf, entries: &mut Vec<PathBuf>, seen: &mut HashSet<String>) {
+    if path.as_os_str().is_empty() {
+        return;
+    }
+
+    let key = path.to_string_lossy().to_ascii_lowercase();
+    if seen.insert(key) {
+        entries.push(path);
+    }
+}
+
+#[cfg(target_os = "windows")]
+fn registry_path_values() -> Vec<OsString> {
+    [
+        (r"HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment", "Path"),
+        (r"HKCU\Environment", "Path"),
+    ]
+    .into_iter()
+    .filter_map(|(key, value)| read_registry_value(key, value))
+    .collect()
+}
+
+#[cfg(target_os = "windows")]
+fn read_registry_value(key: &str, value: &str) -> Option<OsString> {
+    let output = command_output_without_refreshed_path("reg.exe", &["query", key, "/v", value]).ok()?;
+    if !output.status.success() {
+        return None;
+    }
+
+    let stdout = String::from_utf8(output.stdout).ok()?;
+    stdout
+        .lines()
+        .filter_map(|line| parse_reg_query_value_line(line, value))
+        .next()
+        .map(expand_windows_env_vars)
+        .map(OsString::from)
+}
+
+#[cfg(target_os = "windows")]
+fn parse_reg_query_value_line(line: &str, value: &str) -> Option<String> {
+    let trimmed = line.trim();
+    if !trimmed
+        .to_ascii_lowercase()
+        .starts_with(&value.to_ascii_lowercase())
+    {
+        return None;
+    }
+
+    let mut parts = trimmed.split_whitespace();
+    let _name = parts.next()?;
+    let _kind = parts.next()?;
+    let data = parts.collect::<Vec<_>>().join(" ");
+
+    if data.is_empty() {
+        None
+    } else {
+        Some(data)
+    }
+}
+
+#[cfg(target_os = "windows")]
+fn expand_windows_env_vars(value: String) -> String {
+    let mut expanded = value;
+    for (name, replacement) in std::env::vars() {
+        expanded = expanded.replace(&format!("%{name}%"), &replacement);
+        expanded = expanded.replace(&format!("%{}%", name.to_ascii_uppercase()), &replacement);
+        expanded = expanded.replace(&format!("%{}%", name.to_ascii_lowercase()), &replacement);
+    }
+    expanded
+}
+
+#[cfg(target_os = "windows")]
+fn known_path_entries() -> Vec<PathBuf> {
+    known_binary_candidates("git")
+        .into_iter()
+        .chain(known_binary_candidates("node"))
+        .chain(known_binary_candidates("npm"))
+        .filter_map(|path| path.parent().map(Path::to_path_buf))
+        .collect()
+}
+
+#[cfg(target_os = "windows")]
+fn command_output_without_refreshed_path(
+    program: &str,
+    args: &[&str],
+) -> std::io::Result<std::process::Output> {
+    let mut command = Command::new(program);
+    command.args(args);
+    command.creation_flags(CREATE_NO_WINDOW);
     command.output()
 }
 

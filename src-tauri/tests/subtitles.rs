@@ -1,8 +1,8 @@
-use molspark_desktop::error::AppError;
-use molspark_desktop::models::{
+use codex_deploy::error::AppError;
+use codex_deploy::models::{
     ExportArtifactKind, SubtitleSegment, TranscriptResult,
 };
-use molspark_desktop::services::subtitles::{SubtitleExtractionRequest, SubtitleService};
+use codex_deploy::services::subtitles::{SubtitleExtractionRequest, SubtitleService};
 
 struct FakeSubtitleClient {
     result: TranscriptResult,
@@ -14,7 +14,7 @@ impl FakeSubtitleClient {
     }
 }
 
-impl molspark_desktop::services::subtitles::GeminiSubtitleClientLike for FakeSubtitleClient {
+impl codex_deploy::services::subtitles::GeminiSubtitleClientLike for FakeSubtitleClient {
     fn extract_subtitles(
         &self,
         _request: SubtitleExtractionRequest,
@@ -39,7 +39,7 @@ fn returns_transcript_segments_and_artifact_from_fake_client() {
                 text: "世界".to_string(),
             },
         ],
-        artifact: molspark_desktop::models::ExportArtifact {
+        artifact: codex_deploy::models::ExportArtifact {
             path: "C:/exports/sample.srt".to_string(),
             kind: ExportArtifactKind::Srt,
         },

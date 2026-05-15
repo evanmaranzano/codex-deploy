@@ -1,18 +1,18 @@
-# AI Dev Installer 安装说明
+# Codex Deploy 安装说明
 
 ## 文档用途
 
-这份说明用于帮助 Windows 用户完成 `AI Dev Installer` 的安装，并通过应用内流程准备 `Codex` 所需的基础环境。
+这份说明用于帮助 Windows 用户完成 `Codex Deploy` 的安装，并通过应用内流程准备 `Codex` 所需的基础环境。
 
 如果你已经拿到安装包：
 
-`AI Dev Installer_0.1.0_x64-setup.exe`
+`Codex Deploy_0.1.0_x64-setup.exe`
 
 可以按照下面的步骤，从启动安装包到确认环境状态，完整走完一次安装流程。
 
 ## 这款安装器会做什么
 
-`AI Dev Installer` 会检查并准备以下组件：
+`Codex Deploy` 会检查并准备以下组件：
 
 - Git
 - Python
@@ -40,7 +40,7 @@
 
 找到安装包：
 
-`AI Dev Installer_0.1.0_x64-setup.exe`
+`Codex Deploy_0.1.0_x64-setup.exe`
 
 双击后会看到标准安装向导。建议直接按向导提示继续。
 
@@ -56,17 +56,17 @@
 1. 阅读欢迎页后点击 `Next`。
 2. 确认安装位置。
 3. 点击安装并等待第三方资源解压和程序写入完成。
-4. 在完成页点击 `Finish` 启动 `AI Dev Installer`。
+4. 在完成页点击 `Finish` 启动 `Codex Deploy`。
 
 默认安装位置通常为：
 
-`C:\Users\Administrator\AppData\Local\AI Dev Installer`
+`C:\Users\Administrator\AppData\Local\Codex Deploy`
 
 如果你没有特殊需求，建议保留默认位置。
 
 ## 第三步：认识应用主界面
 
-打开 `AI Dev Installer` 后，页面主要分为几个区域：
+打开 `Codex Deploy` 后，页面主要分为几个区域：
 
 - 顶部横幅区
 - `安装进度`
@@ -208,7 +208,7 @@
 处理方法：
 
 1. 关闭当前程序。
-2. 找到安装后的 `AI Dev Installer` 或安装包。
+2. 找到安装后的 `Codex Deploy` 或安装包。
 3. 右键选择“以管理员身份运行”。
 
 ### 2. 某个组件明明装过，页面仍提示未安装
@@ -245,9 +245,9 @@
 
 如果你只想看最短步骤，可以按下面做：
 
-1. 双击 `AI Dev Installer_0.1.0_x64-setup.exe`
+1. 双击 `Codex Deploy_0.1.0_x64-setup.exe`
 2. 按安装向导完成安装
-3. 打开 `AI Dev Installer`
+3. 打开 `Codex Deploy`
 4. 点击 `重新检测环境`
 5. 点击 `全部安装`
 6. 等待执行完成
