@@ -1,85 +1,55 @@
 # Codex Deploy
 
-一个基于 [Tauri 2](https://v2.tauri.app/) 的 Windows 桌面应用，用于一键准备 Codex 所需的基础开发环境。
+`Codex Deploy` 是一个面向 Windows 的一键部署器，用来把运行 Codex 所需的基础环境一次准备好。
 
-## 它会帮你做什么
+它把环境检测、依赖安装、状态展示和失败重试放进一个桌面应用里，目标是让用户不必手动逐个安装 Git、Python、Node.js、CC Switch，再自己排查 PATH 和权限问题。
 
-`Codex Deploy` 会检查并安装以下组件：
+## 下载
+
+- [最新 Release](https://github.com/evanmaranzano/codex-deploy/releases/latest)
+- [安装包下载页](https://github.com/evanmaranzano/codex-deploy/releases)
+- [安装说明](docs/codex-deploy-安装说明.md)
+
+## 功能
+
+- 一键检测本机是否已具备 Codex 所需基础环境
+- 静默安装 `Git`、`Python`、`Node.js`、`CC Switch`
+- 通过 `winget` 安装 `Codex`
+- 实时展示当前阶段、组件状态和安装日志
+- 安装失败后支持重试当前阶段或重新执行全部流程
+- 安装后自动刷新环境探测，尽量避免因为旧 PATH 导致必须重启电脑
+
+## 当前覆盖组件
 
 | 组件 | 版本 | 说明 |
 |------|------|------|
-| **Git** | 2.54.0 | 代码版本管理工具，Codex 依赖它来管理代码 |
-| **Python** | 3.12.10 | 编程语言运行环境，许多 AI 工具依赖 Python |
-| **Node.js** | 24.15.0 | JavaScript 运行环境，Codex 的运行依赖它 |
-| **CC Switch** | 3.14.1 | 网络代理工具，用于访问海外 AI 服务 |
-| **Codex** | 最新 | OpenAI 推出的 AI 编程助手（通过 winget 安装） |
+| `Git` | 2.54.0 | 代码版本管理工具 |
+| `Python` | 3.12.10 | 运行环境依赖 |
+| `Node.js` | 24.15.0 | JavaScript 运行环境 |
+| `CC Switch` | 3.14.1 | 网络代理工具 |
+| `Codex` | Latest | 通过 `winget` 安装 |
 
-如果系统已检测到某个组件，应用会自动跳过，不会重复安装。
+## 界面预览
 
-## 快速开始
+![首页](docs/installer-home-full.png)
 
-### 下载安装
+![操作区](docs/installer-actions.png)
 
-1. 从 Releases 下载 `Codex Deploy_0.1.0_x64-setup.exe`
-2. 双击运行安装包，按向导提示完成安装
-3. 安装完成后 `Codex Deploy` 会自动打开
-
-### 使用
-
-1. 打开 `Codex Deploy`
-2. 点击 **重新检测环境**，检查已安装的组件
-3. 点击 **全部安装**，一键安装所有缺失组件
-4. 等待安装完成，确认 `Codex` 显示为 `已安装`
-
-> 详细安装教程请参考 [安装说明](docs/codex-deploy-安装说明.md)
+![组件状态](docs/installer-components.png)
 
 ## 系统要求
 
-- Windows 10/11（64 位）
-- 管理员权限（静默安装系统组件需要）
-- 网络连接（Codex 安装依赖 winget）
+- Windows 10/11 x64
+- 管理员权限
+- 可访问 `winget` / Microsoft Store
 
-## 项目结构
-
-```
-codex-deploy/
-├── src/                          # React 前端
-│   ├── App.tsx                   # 应用入口
-│   ├── pages/InstallerPage.tsx   # 安装器主页面
-│   ├── components/               # UI 组件
-│   └── lib/                      # 前端工具库与类型定义
-├── src-tauri/                    # Rust 后端
-│   ├── src/
-│   │   ├── commands/             # Tauri 命令（前端调用入口）
-│   │   ├── services/             # 业务逻辑
-│   │   │   ├── installer/        # 安装器核心：环境检测、执行器、日志
-│   │   │   ├── gemini/           # Gemini API 客户端
-│   │   │   ├── chat.rs           # 聊天服务
-│   │   │   └── settings.rs       # 设置管理
-│   │   ├── models/               # 数据模型
-│   │   └── storage/              # SQLite 存储
-│   ├── resources/third_party/    # 内置第三方安装包（不随 Git 分发）
-│   ├── tauri.conf.json           # Tauri 配置
-│   └── Cargo.toml                # Rust 依赖
-├── docs/                         # 文档与截图
-└── package.json                  # 前端依赖
-```
-
-## 技术栈
-
-- **前端**：React 18 + TypeScript + Vite
-- **后端**：Rust + Tauri 2
-- **数据库**：SQLite（rusqlite）
-- **密钥管理**：Windows Credential Manager（keyring）
-- **打包**：NSIS 安装器
-
-## 从源码构建
+## 本地开发
 
 ### 前置条件
 
-- [Node.js](https://nodejs.org/) >= 18
-- [Rust](https://rustup.rs/) >= 1.70
-- [Tauri CLI](https://v2.tauri.app/start/prerequisites/)
+- Node.js 18+
+- Rust 1.70+
+- Tauri 2 CLI
 
 ### 安装依赖
 
@@ -93,21 +63,51 @@ npm install
 npm run tauri dev
 ```
 
+### 运行测试
+
+```bash
+npm run test
+cargo test --manifest-path src-tauri/Cargo.toml
+```
+
 ### 构建安装包
 
 ```bash
 npm run tauri build
 ```
 
-构建产物位于 `src-tauri/target/release/bundle/nsis/`。
+构建产物默认位于：
 
-> **注意**：内置的第三方安装包（Git、Python、Node.js、CC Switch）需要单独获取并放置到 `src-tauri/resources/third_party/` 对应目录下，然后更新 `manifest.json` 中的 SHA256 校验值。
-
-### 运行测试
-
-```bash
-npm run test
+```text
+src-tauri/target/release/bundle/nsis/
 ```
+
+## 项目结构
+
+```text
+codex-deploy/
+├── src/                # React 前端
+├── src-tauri/          # Rust + Tauri 后端
+├── docs/               # 安装说明与截图
+├── package.json
+└── README.md
+```
+
+## 技术栈
+
+- React 18
+- TypeScript
+- Vite
+- Rust
+- Tauri 2
+- SQLite (`rusqlite`)
+- Windows Credential Manager (`keyring`)
+
+## 说明
+
+- 第三方安装包资源不全部随 Git 仓库分发
+- `src-tauri/resources/third_party/manifest.json` 负责记录资源版本和校验信息
+- 若补齐第三方资源并执行打包，可生成完整 Windows 安装器
 
 ## License
 
