@@ -42,7 +42,7 @@
 ## 项目结构
 
 ```
-desktop/
+codex-deploy/
 ├── src/                          # React 前端
 │   ├── App.tsx                   # 应用入口
 │   ├── pages/InstallerPage.tsx   # 安装器主页面
