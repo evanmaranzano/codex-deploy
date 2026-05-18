@@ -10,12 +10,6 @@
 - 希望统一安装 Codex 与 Claude Code
 - 不想手动处理 PATH、权限和基础依赖
 
-## 下载
-
-- [最新 Release](https://github.com/evanmaranzano/codex-deploy/releases/latest)
-- [安装包下载页](https://github.com/evanmaranzano/codex-deploy/releases)
-- [安装说明](docs/codex-deploy-安装说明.md)
-
 ## 快速开始
 
 1. 从 Release 页面下载 `AI Dev Installer_0.1.0_x64-setup.exe`
