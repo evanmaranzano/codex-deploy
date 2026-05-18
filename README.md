@@ -1,6 +1,6 @@
-# Codex Deploy
+# AI Dev Installer
 
-`Codex Deploy` 是一个面向 Windows 的一键部署器，用来把运行 Codex 所需的基础环境一次准备好。
+`AI Dev Installer` 是一个面向 Windows 的一键部署器，用来把运行 Codex、Claude Code 所需的基础环境一次准备好。
 
 它把环境检测、依赖安装、状态展示和失败重试放进一个桌面应用里，目标是让用户不必手动逐个安装 Git、Python、Node.js、CC Switch，再自己排查 PATH 和权限问题。
 
@@ -15,6 +15,8 @@
 - 一键检测本机是否已具备 Codex 所需基础环境
 - 静默安装 `Git`、`Python`、`Node.js`、`CC Switch`
 - 通过 `winget` 安装 `Codex`
+- 通过 `npm` 安装 `Claude Code`
+- 支持单独执行 `安装 Codex`、`安装 Claude Code` 或 `全部安装`
 - 实时展示当前阶段、组件状态和安装日志
 - 安装失败后支持重试当前阶段或重新执行全部流程
 - 安装后自动刷新环境探测，尽量避免因为旧 PATH 导致必须重启电脑
@@ -28,6 +30,7 @@
 | `Node.js` | 24.15.0 | JavaScript 运行环境 |
 | `CC Switch` | 3.14.1 | 网络代理工具 |
 | `Codex` | Latest | 通过 `winget` 安装 |
+| `Claude Code` | Latest | 通过 `npm` 安装 |
 
 ## 界面预览
 

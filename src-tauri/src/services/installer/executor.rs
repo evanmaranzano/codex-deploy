@@ -40,6 +40,17 @@ pub fn codex_install_commands() -> Vec<PlannedCommand> {
     }]
 }
 
+pub fn claude_code_install_commands() -> Vec<PlannedCommand> {
+    vec![PlannedCommand {
+        program: find_program_on_path("npm").unwrap_or_else(|| "npm".into()),
+        args: vec![
+            "install".into(),
+            "-g".into(),
+            "@anthropic-ai/claude-code".into(),
+        ],
+    }]
+}
+
 pub fn winget_program() -> String {
     find_program_on_path("winget")
         .or_else(|| {
@@ -98,10 +109,10 @@ fn executable_names(program: &str) -> Vec<String> {
         vec![program.to_string()]
     } else {
         vec![
-            program.to_string(),
             format!("{program}.exe"),
             format!("{program}.cmd"),
             format!("{program}.bat"),
+            program.to_string(),
         ]
     }
 }
@@ -154,6 +165,27 @@ pub fn stage_sequence(flow: &str) -> Vec<InstallStageId> {
             InstallStageId::InstallCcSwitch,
             InstallStageId::RefreshEnvironment,
             InstallStageId::InstallCodex,
+            InstallStageId::Verify,
+        ],
+        "install_claude_code" => vec![
+            InstallStageId::Preflight,
+            InstallStageId::InstallGit,
+            InstallStageId::InstallPython,
+            InstallStageId::InstallNode,
+            InstallStageId::InstallCcSwitch,
+            InstallStageId::RefreshEnvironment,
+            InstallStageId::InstallClaudeCode,
+            InstallStageId::Verify,
+        ],
+        "install_all" => vec![
+            InstallStageId::Preflight,
+            InstallStageId::InstallGit,
+            InstallStageId::InstallPython,
+            InstallStageId::InstallNode,
+            InstallStageId::InstallCcSwitch,
+            InstallStageId::RefreshEnvironment,
+            InstallStageId::InstallCodex,
+            InstallStageId::InstallClaudeCode,
             InstallStageId::Verify,
         ],
         _ => vec![

@@ -80,7 +80,8 @@ export type InstallerComponentId =
   | "python"
   | "nodejs"
   | "cc_switch"
-  | "codex";
+  | "codex"
+  | "claude_code";
 
 export type InstallerComponentStatus =
   | "not_installed"
@@ -99,11 +100,12 @@ export type InstallStageId =
   | "install_cc_switch"
   | "refresh_environment"
   | "install_codex"
+  | "install_claude_code"
   | "verify"
   | "completed"
   | "failed";
 
-export type InstallFlowKind = "install_codex" | "install_all";
+export type InstallFlowKind = "install_codex" | "install_claude_code" | "install_all";
 
 export interface InstallerComponentState {
   id: InstallerComponentId;

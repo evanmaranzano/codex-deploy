@@ -10,6 +10,7 @@ interface InstallerPageProps {
   isRefreshingSnapshot: boolean;
   hasInitializationError: boolean;
   onInstallCodex: () => void;
+  onInstallClaudeCode: () => void;
   onInstallAll: () => void;
   onRefreshSnapshot: () => void;
   onRetryStage: () => void;
@@ -22,6 +23,7 @@ export function InstallerPage({
   isRefreshingSnapshot,
   hasInitializationError,
   onInstallCodex,
+  onInstallClaudeCode,
   onInstallAll,
   onRefreshSnapshot,
   onRetryStage,
@@ -94,7 +96,7 @@ export function InstallerPage({
           </span>
           <div style={{ display: "grid", gap: "10px" }}>
             <h1 style={{ margin: 0, color: "#f8fafc", fontSize: "clamp(2rem, 4vw, 3.4rem)" }}>
-              Codex Deploy
+              AI Dev Installer
             </h1>
             <p
               style={{
@@ -104,8 +106,8 @@ export function InstallerPage({
                 lineHeight: 1.7
               }}
             >
-              面向 Windows 的 Codex 一键部署器，一次准备 Git、Python、Node.js、CC Switch 与
-              Codex 所需基础环境。
+              面向 Windows 的 AI 开发环境一键部署器，一次准备 Git、Python、Node.js、CC Switch、
+              Codex 与 Claude Code 所需基础环境。
             </p>
           </div>
         </div>
@@ -151,6 +153,9 @@ export function InstallerPage({
         </button>
         <button type="button" disabled={areInstallActionsDisabled} onClick={onInstallCodex}>
           安装 Codex
+        </button>
+        <button type="button" disabled={areInstallActionsDisabled} onClick={onInstallClaudeCode}>
+          安装 Claude Code
         </button>
         <button type="button" disabled={areInstallActionsDisabled} onClick={onInstallAll}>
           全部安装

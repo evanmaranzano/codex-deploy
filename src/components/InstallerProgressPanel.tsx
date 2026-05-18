@@ -14,6 +14,7 @@ const STAGE_LABELS: Record<InstallerSnapshot["currentStage"], string> = {
   install_cc_switch: "安装 CC Switch",
   refresh_environment: "刷新环境变量",
   install_codex: "安装 Codex",
+  install_claude_code: "安装 Claude Code",
   verify: "验证安装结果",
   completed: "安装完成",
   failed: "安装失败"

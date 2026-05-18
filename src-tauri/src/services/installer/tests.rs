@@ -2,8 +2,8 @@ use crate::services::installer::environment::{
     build_initial_snapshot, DetectedBinary, EnvironmentProbe,
 };
 use crate::services::installer::executor::{
-    codex_install_commands, command_display, stage_sequence, third_party_install_command,
-    winget_candidate_paths,
+    claude_code_install_commands, codex_install_commands, command_display, stage_sequence,
+    third_party_install_command, winget_candidate_paths,
 };
 use crate::services::installer::manifest::{verify_sha256, InstallerManifest};
 use crate::services::installer::service::{
@@ -39,6 +39,10 @@ impl EnvironmentProbe for FakeProbe {
             "npm" => Some(DetectedBinary {
                 version: Some("10.8.3".into()),
                 path: Some("C:\\Program Files\\nodejs\\npm.cmd".into()),
+            }),
+            "claude" => Some(DetectedBinary {
+                version: Some("0.0.77".into()),
+                path: Some("C:\\Users\\Administrator\\AppData\\Roaming\\npm\\claude.cmd".into()),
             }),
             _ => None,
         }
@@ -119,7 +123,7 @@ fn builds_snapshot_from_detected_machine_state() {
     assert_eq!(snapshot.current_stage, "idle");
     assert_eq!(snapshot.progress_percent, 0);
     assert_eq!(snapshot.last_error, None);
-    assert_eq!(snapshot.components.len(), 5);
+    assert_eq!(snapshot.components.len(), 6);
     assert_eq!(snapshot.components[0].id, "git");
     assert_eq!(snapshot.components[0].label, "Git");
     assert_eq!(snapshot.components[0].status, "installed");
@@ -151,6 +155,14 @@ fn builds_snapshot_from_detected_machine_state() {
     assert_eq!(snapshot.components[3].status, "not_installed");
     assert_eq!(snapshot.components[3].detail, "未检测到");
     assert_eq!(snapshot.components[4].id, "codex");
+    assert_eq!(snapshot.components[5].id, "claude_code");
+    assert_eq!(snapshot.components[5].label, "Claude Code");
+    assert_eq!(snapshot.components[5].status, "installed");
+    assert_eq!(
+        snapshot.components[5].detail,
+        "C:\\Users\\Administrator\\AppData\\Roaming\\npm\\claude.cmd"
+    );
+    assert_eq!(snapshot.components[5].version.as_deref(), Some("0.0.77"));
     assert!(snapshot.logs.is_empty());
 }
 
@@ -166,6 +178,10 @@ fn builds_non_admin_snapshot_with_error_and_detected_fallback_detail() {
     assert_eq!(snapshot.components[4].status, "not_installed");
     assert_eq!(snapshot.components[4].detail, "未检测到");
     assert_eq!(snapshot.components[4].version, None);
+    assert_eq!(snapshot.components[5].id, "claude_code");
+    assert_eq!(snapshot.components[5].status, "installed");
+    assert_eq!(snapshot.components[5].detail, "已检测到命令");
+    assert_eq!(snapshot.components[5].version, None);
 }
 
 #[test]
@@ -179,6 +195,8 @@ fn detects_codex_via_microsoft_store_package_probe() {
         snapshot.components[4].version.as_deref(),
         Some("26.416.11627")
     );
+    assert_eq!(snapshot.components[5].id, "claude_code");
+    assert_eq!(snapshot.components[5].status, "not_installed");
 }
 
 #[test]
@@ -277,6 +295,36 @@ fn plans_codex_install_with_msstore_winget_product_id() {
             "--accept-source-agreements".to_string(),
             "--accept-package-agreements".to_string(),
             "--silent".to_string()
+        ]
+    );
+}
+
+#[test]
+fn plans_claude_code_install_with_official_npm_package() {
+    let commands = claude_code_install_commands();
+
+    assert_eq!(commands.len(), 1);
+    assert!(
+        commands[0].program.eq_ignore_ascii_case("npm")
+            || commands[0]
+                .program
+                .to_ascii_lowercase()
+                .ends_with("npm.cmd")
+            || commands[0]
+                .program
+                .to_ascii_lowercase()
+                .ends_with("npm.bat")
+            || commands[0]
+                .program
+                .to_ascii_lowercase()
+                .ends_with("npm.exe")
+    );
+    assert_eq!(
+        commands[0].args,
+        vec![
+            "install".to_string(),
+            "-g".to_string(),
+            "@anthropic-ai/claude-code".to_string(),
         ]
     );
 }
@@ -408,6 +456,33 @@ fn stage_sequence_matches_expected_flow_ordering() {
             crate::models::installer::InstallStageId::Verify,
         ]
     );
+    assert_eq!(
+        stage_sequence("install_claude_code"),
+        vec![
+            crate::models::installer::InstallStageId::Preflight,
+            crate::models::installer::InstallStageId::InstallGit,
+            crate::models::installer::InstallStageId::InstallPython,
+            crate::models::installer::InstallStageId::InstallNode,
+            crate::models::installer::InstallStageId::InstallCcSwitch,
+            crate::models::installer::InstallStageId::RefreshEnvironment,
+            crate::models::installer::InstallStageId::InstallClaudeCode,
+            crate::models::installer::InstallStageId::Verify,
+        ]
+    );
+    assert_eq!(
+        stage_sequence("install_all"),
+        vec![
+            crate::models::installer::InstallStageId::Preflight,
+            crate::models::installer::InstallStageId::InstallGit,
+            crate::models::installer::InstallStageId::InstallPython,
+            crate::models::installer::InstallStageId::InstallNode,
+            crate::models::installer::InstallStageId::InstallCcSwitch,
+            crate::models::installer::InstallStageId::RefreshEnvironment,
+            crate::models::installer::InstallStageId::InstallCodex,
+            crate::models::installer::InstallStageId::InstallClaudeCode,
+            crate::models::installer::InstallStageId::Verify,
+        ]
+    );
 }
 
 #[test]
@@ -424,6 +499,33 @@ fn installer_service_returns_stage_names_for_requested_flow() {
             "InstallCcSwitch".to_string(),
             "RefreshEnvironment".to_string(),
             "InstallCodex".to_string(),
+            "Verify".to_string(),
+        ]
+    );
+    assert_eq!(
+        service.stage_sequence_for("install_claude_code"),
+        vec![
+            "Preflight".to_string(),
+            "InstallGit".to_string(),
+            "InstallPython".to_string(),
+            "InstallNode".to_string(),
+            "InstallCcSwitch".to_string(),
+            "RefreshEnvironment".to_string(),
+            "InstallClaudeCode".to_string(),
+            "Verify".to_string(),
+        ]
+    );
+    assert_eq!(
+        service.stage_sequence_for("install_all"),
+        vec![
+            "Preflight".to_string(),
+            "InstallGit".to_string(),
+            "InstallPython".to_string(),
+            "InstallNode".to_string(),
+            "InstallCcSwitch".to_string(),
+            "RefreshEnvironment".to_string(),
+            "InstallCodex".to_string(),
+            "InstallClaudeCode".to_string(),
             "Verify".to_string(),
         ]
     );
@@ -456,6 +558,52 @@ fn installer_service_builds_snapshot_updates_for_requested_flow() {
 }
 
 #[test]
+fn installer_service_builds_snapshot_updates_for_install_all_with_claude_code_last() {
+    let service = InstallerService::production();
+    let snapshots = service
+        .snapshot_updates_for("install_all")
+        .expect("snapshot updates should build");
+
+    assert_eq!(snapshots.len(), 10);
+    assert_eq!(
+        snapshots[7].current_stage,
+        crate::models::installer::InstallStageId::InstallClaudeCode
+    );
+    assert_eq!(snapshots[7].progress_percent, 80);
+    assert_eq!(
+        snapshots[8].current_stage,
+        crate::models::installer::InstallStageId::Verify
+    );
+    assert_eq!(
+        snapshots[9].current_stage,
+        crate::models::installer::InstallStageId::Completed
+    );
+}
+
+#[test]
+fn installer_service_builds_snapshot_updates_for_install_claude_code_flow() {
+    let service = InstallerService::production();
+    let snapshots = service
+        .snapshot_updates_for("install_claude_code")
+        .expect("snapshot updates should build");
+
+    assert_eq!(snapshots.len(), 9);
+    assert_eq!(
+        snapshots[6].current_stage,
+        crate::models::installer::InstallStageId::InstallClaudeCode
+    );
+    assert_eq!(snapshots[6].progress_percent, 77);
+    assert_eq!(
+        snapshots[7].current_stage,
+        crate::models::installer::InstallStageId::Verify
+    );
+    assert_eq!(
+        snapshots[8].current_stage,
+        crate::models::installer::InstallStageId::Completed
+    );
+}
+
+#[test]
 fn installer_service_retries_from_failed_stage() {
     let service = InstallerService::production();
     let snapshots = service
@@ -477,6 +625,28 @@ fn installer_service_retries_from_failed_stage() {
         crate::models::installer::InstallStageId::Completed
     );
     assert_eq!(snapshots[2].progress_percent, 100);
+}
+
+#[test]
+fn installer_service_retries_from_claude_code_stage_with_verify_afterwards() {
+    let service = InstallerService::production();
+    let snapshots = service
+        .retry_snapshots_for_stage(crate::models::installer::InstallStageId::InstallClaudeCode)
+        .expect("retry snapshots should build");
+
+    assert_eq!(snapshots.len(), 3);
+    assert_eq!(
+        snapshots[0].current_stage,
+        crate::models::installer::InstallStageId::InstallClaudeCode
+    );
+    assert_eq!(
+        snapshots[1].current_stage,
+        crate::models::installer::InstallStageId::Verify
+    );
+    assert_eq!(
+        snapshots[2].current_stage,
+        crate::models::installer::InstallStageId::Completed
+    );
 }
 
 #[test]

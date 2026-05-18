@@ -18,7 +18,8 @@ const EMPTY_SNAPSHOT: InstallerSnapshot = {
     { id: "python", label: "Python", status: "checking", detail: "等待检测", version: null },
     { id: "nodejs", label: "Node.js", status: "checking", detail: "等待检测", version: null },
     { id: "cc_switch", label: "CC Switch", status: "checking", detail: "等待检测", version: null },
-    { id: "codex", label: "Codex", status: "checking", detail: "等待检测", version: null }
+    { id: "codex", label: "Codex", status: "checking", detail: "等待检测", version: null },
+    { id: "claude_code", label: "Claude Code", status: "checking", detail: "等待检测", version: null }
   ],
   logs: [],
   lastError: null
@@ -172,11 +173,13 @@ export default function App() {
       });
   };
 
-  const handleFlowStart = (flow: "install_codex" | "install_all") => {
+  const handleFlowStart = (flow: "install_codex" | "install_claude_code" | "install_all") => {
     const queuedMessage =
       flow === "install_all"
         ? "已提交全部安装请求，正在准备安装环境..."
-        : "已提交 Codex 安装请求，正在准备安装环境...";
+        : flow === "install_claude_code"
+          ? "已提交 Claude Code 安装请求，正在准备安装环境..."
+          : "已提交 Codex 安装请求，正在准备安装环境...";
 
     setSnapshot((current) => createQueuedFlowSnapshot(current, queuedMessage));
     setIsBusy(true);
@@ -282,6 +285,7 @@ export default function App() {
           isRefreshingSnapshot={isRefreshingSnapshot}
           hasInitializationError={hasInitializationError}
           onInstallCodex={() => handleFlowStart("install_codex")}
+          onInstallClaudeCode={() => handleFlowStart("install_claude_code")}
           onInstallAll={() => handleFlowStart("install_all")}
           onRefreshSnapshot={handleRefreshSnapshot}
           onRetryStage={handleRetryCurrentStage}

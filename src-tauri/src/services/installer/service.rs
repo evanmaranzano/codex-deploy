@@ -16,8 +16,8 @@ use crate::models::installer::{
 };
 use crate::services::installer::environment::{build_initial_snapshot, DetectExecutionEnvironment};
 use crate::services::installer::executor::{
-    codex_install_commands, command_display, stage_sequence, third_party_install_command,
-    PlannedCommand,
+    claude_code_install_commands, codex_install_commands, command_display, stage_sequence,
+    third_party_install_command, PlannedCommand,
 };
 use crate::services::installer::manifest::{verify_sha256, InstallerManifest};
 
@@ -130,6 +130,7 @@ impl InstallerService {
         let mut snapshot = build_initial_snapshot(&DetectExecutionEnvironment);
         let flow = match failed_stage {
             InstallStageId::InstallCodex => "install_codex",
+            InstallStageId::InstallClaudeCode => "install_claude_code",
             _ => "install_all",
         };
         let stages = stage_sequence(flow);
@@ -275,6 +276,10 @@ impl InstallerService {
 
         let retry_flow = match failed_stage {
             InstallStageId::InstallCodex => "install_codex",
+            InstallStageId::InstallClaudeCode => match flow.as_str() {
+                "install_claude_code" => "install_claude_code",
+                _ => "install_all",
+            },
             _ => flow.as_str(),
         };
 
@@ -320,6 +325,9 @@ impl InstallerService {
             ),
             InstallStageId::RefreshEnvironment => self.execute_refresh_environment(snapshot),
             InstallStageId::InstallCodex => self.execute_codex_install(app, snapshot),
+            InstallStageId::InstallClaudeCode => {
+                self.execute_claude_code_install(app, snapshot, flow)
+            }
             InstallStageId::Verify => self.execute_verify(snapshot, flow),
             InstallStageId::Idle | InstallStageId::Completed | InstallStageId::Failed => Ok(()),
         }
@@ -491,6 +499,82 @@ impl InstallerService {
         Ok(())
     }
 
+    fn execute_claude_code_install(
+        &self,
+        app: &AppHandle,
+        snapshot: &mut InstallerSnapshot,
+        flow: &str,
+    ) -> Result<(), AppError> {
+        if !matches!(flow, "install_all" | "install_claude_code") {
+            return Ok(());
+        }
+
+        if mark_component_skipped_if_installed(
+            snapshot,
+            "claude_code",
+            InstallStageId::InstallClaudeCode,
+        ) {
+            persist_latest_snapshot(snapshot.clone())?;
+            emit_snapshot(app, snapshot)?;
+            return Ok(());
+        }
+
+        set_component_status(
+            &mut snapshot.components,
+            "claude_code",
+            InstallerComponentStatus::Installing,
+            "正在通过 npm 安装 Claude Code，请稍候".into(),
+            None,
+        );
+        snapshot.logs.push(build_log_entry(
+            InstallStageId::InstallClaudeCode,
+            "info",
+            "已启动 Claude Code 安装命令".into(),
+        ));
+        persist_latest_snapshot(snapshot.clone())?;
+        emit_snapshot(app, snapshot)?;
+
+        match self.run_commands(
+            &claude_code_install_commands(),
+            InstallStageId::InstallClaudeCode,
+        ) {
+            Ok(()) => {
+                set_component_status(
+                    &mut snapshot.components,
+                    "claude_code",
+                    InstallerComponentStatus::Installing,
+                    "Claude Code 安装命令已完成，等待最终校验".into(),
+                    None,
+                );
+            }
+            Err(error) => {
+                set_component_status(
+                    &mut snapshot.components,
+                    "claude_code",
+                    InstallerComponentStatus::Failed,
+                    "Claude Code 安装失败".into(),
+                    None,
+                );
+                snapshot.logs.push(build_log_entry(
+                    InstallStageId::InstallClaudeCode,
+                    "error",
+                    format!("Claude Code 安装失败：{}", error.message),
+                ));
+                if let Some(details) = error.details.as_ref().filter(|value| !value.trim().is_empty()) {
+                    snapshot.logs.push(build_log_entry(
+                        InstallStageId::InstallClaudeCode,
+                        "error",
+                        details.clone(),
+                    ));
+                }
+                persist_latest_snapshot(snapshot.clone())?;
+                emit_snapshot(app, snapshot)?;
+            }
+        }
+
+        Ok(())
+    }
+
     fn execute_verify(&self, snapshot: &mut InstallerSnapshot, flow: &str) -> Result<(), AppError> {
         let refreshed = build_initial_snapshot(&DetectExecutionEnvironment);
         for updated in refreshed.components {
@@ -505,6 +589,8 @@ impl InstallerService {
 
         let required_components: &[&str] = match flow {
             "install_codex" => &["git", "python", "nodejs", "cc_switch", "codex"],
+            "install_claude_code" => &["git", "python", "nodejs", "cc_switch", "claude_code"],
+            "install_all" => &["git", "python", "nodejs", "cc_switch", "codex"],
             _ => &["git", "python", "nodejs", "cc_switch", "codex"],
         };
 
@@ -522,6 +608,16 @@ impl InstallerService {
             .collect();
 
         if failed.is_empty() {
+            if flow == "install_all"
+                && component_status(&snapshot.components, "claude_code")
+                    == Some(InstallerComponentStatus::Failed)
+            {
+                snapshot.logs.push(build_log_entry(
+                    InstallStageId::Verify,
+                    "warn",
+                    "主流程安装完成，但 Claude Code 安装失败".into(),
+                ));
+            }
             snapshot.logs.push(build_log_entry(
                 InstallStageId::Verify,
                 "info",
@@ -581,7 +677,7 @@ impl InstallerService {
         let output = process.output().map_err(|error| AppError {
                 code: "installer_command_spawn_failed".into(),
                 message: if stage == InstallStageId::InstallCodex && is_winget_command(command) {
-                    "Failed to start winget. Please install or repair Microsoft App Installer, then reopen Codex Deploy.".into()
+                    "Failed to start winget. Please install or repair Microsoft App Installer, then reopen AI Dev Installer.".into()
                 } else {
                     format!("Failed to start {}", command.program)
                 },
@@ -737,6 +833,7 @@ fn format_stage(stage: &InstallStageId) -> &'static str {
         InstallStageId::InstallCcSwitch => "install_cc_switch",
         InstallStageId::RefreshEnvironment => "refresh_environment",
         InstallStageId::InstallCodex => "install_codex",
+        InstallStageId::InstallClaudeCode => "install_claude_code",
         InstallStageId::Verify => "verify",
         InstallStageId::Completed => "completed",
         InstallStageId::Failed => "failed",

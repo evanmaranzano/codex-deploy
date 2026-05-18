@@ -1,24 +1,25 @@
-# Codex Deploy 安装说明
+# AI Dev Installer 安装说明
 
 ## 文档用途
 
-这份说明用于帮助 Windows 用户完成 `Codex Deploy` 的安装，并通过应用内流程准备 `Codex` 所需的基础环境。
+这份说明用于帮助 Windows 用户完成 `AI Dev Installer` 的安装，并通过应用内流程准备 `Codex`、`Claude Code` 所需的基础环境。
 
 如果你已经拿到安装包：
 
-`Codex Deploy_0.1.0_x64-setup.exe`
+`AI Dev Installer_0.1.0_x64-setup.exe`
 
 可以按照下面的步骤，从启动安装包到确认环境状态，完整走完一次安装流程。
 
 ## 这款安装器会做什么
 
-`Codex Deploy` 会检查并准备以下组件：
+`AI Dev Installer` 会检查并准备以下组件：
 
 - Git
 - Python
 - Node.js
 - CC Switch
 - Codex
+- Claude Code
 
 其中，Git、Python、Node.js、CC Switch 会通过安装包内置资源执行静默安装；如果系统已经检测到这些组件，应用会自动跳过对应阶段，不需要手动卸载重装。
 
@@ -35,12 +36,13 @@
 
 - 如果没有管理员权限，应用会在安装前检查阶段直接提示失败。
 - `Codex` 的安装依赖 Microsoft Store / App Installer / `winget`，因此联网和系统组件状态都很重要。
+- `Claude Code` 的安装依赖 `npm`，因此 `Node.js` 环境和网络也会影响结果。
 
 ## 第一步：启动安装包
 
 找到安装包：
 
-`Codex Deploy_0.1.0_x64-setup.exe`
+`AI Dev Installer_0.1.0_x64-setup.exe`
 
 双击后会看到标准安装向导。建议直接按向导提示继续。
 
@@ -56,17 +58,17 @@
 1. 阅读欢迎页后点击 `Next`。
 2. 确认安装位置。
 3. 点击安装并等待第三方资源解压和程序写入完成。
-4. 在完成页点击 `Finish` 启动 `Codex Deploy`。
+4. 在完成页点击 `Finish` 启动 `AI Dev Installer`。
 
 默认安装位置通常为：
 
-`C:\Users\Administrator\AppData\Local\Codex Deploy`
+`C:\Users\Administrator\AppData\Local\AI Dev Installer`
 
 如果你没有特殊需求，建议保留默认位置。
 
 ## 第三步：认识应用主界面
 
-打开 `Codex Deploy` 后，页面主要分为几个区域：
+打开 `AI Dev Installer` 后，页面主要分为几个区域：
 
 - 顶部横幅区
 - `安装进度`
@@ -78,6 +80,7 @@
 
 - `重新检测环境`
 - `安装 Codex`
+- `安装 Claude Code`
 - `全部安装`
 - `重试当前阶段`
 - `重新执行全部安装`
@@ -93,7 +96,7 @@
 
 `重新检测环境`
 
-这个动作会重新检查电脑里是否已经存在 Git、Python、Node.js、CC Switch、Codex。
+这个动作会重新检查电脑里是否已经存在 Git、Python、Node.js、CC Switch、Codex、Claude Code。
 
 如果某个组件已经存在，界面通常会显示：
 
@@ -117,23 +120,25 @@
 5. 安装 CC Switch
 6. 刷新环境探测结果
 7. 安装 Codex
-8. 验证安装结果
+8. 安装 Claude Code
+9. 验证安装结果
 
 说明：
 
 - 已安装组件会自动跳过。
 - 安装命令执行完成后，应用还会做一次最终验证，所以看到进度暂停几秒是正常现象。
 
-## 第六步：怎样理解“安装 Codex”
+## 第六步：怎样理解“安装 Codex”和“安装 Claude Code”
 
-界面中虽然有 `安装 Codex` 按钮，但当前版本并不是只执行单一的 Codex 安装动作。
+界面中虽然有 `安装 Codex` 按钮和 `安装 Claude Code` 按钮，但当前版本并不是只执行一个裸安装命令。
 
-它仍然会经过安装前检查、基础组件检查与环境刷新，然后再进入 `Codex` 安装和最终验证。
+它们都会先经过安装前检查、基础组件检查与环境刷新，再进入目标组件安装和最终验证。
 
 因此，更准确的理解方式是：
 
 - `全部安装`：完整推荐流程
 - `安装 Codex`：以 Codex 为目标的安装流程，但仍会检查并补齐前置依赖
+- `安装 Claude Code`：以 Claude Code 为目标的安装流程，会安装 Git、Python、Node.js、CC Switch，跳过 Codex，再安装 Claude Code
 
 ## 第七步：安装过程中怎么看状态
 
@@ -153,6 +158,7 @@
 - `安装 CC Switch`
 - `刷新环境变量`
 - `安装 Codex`
+- `安装 Claude Code`
 - `验证安装结果`
 - `安装完成`
 - `安装失败`
@@ -175,14 +181,14 @@
 
 1. `安装进度` 显示 100% 或接近完成。
 2. 当前阶段显示为 `安装完成`。
-3. `Codex` 显示为 `已安装`。
+3. `Codex` 或 `Claude Code` 显示为 `已安装`。
 4. 其他基础组件显示为 `已安装` 或 `已跳过`。
 
 如果你想再确认一次，可以再点：
 
 `重新检测环境`
 
-只要重新检测后 `Codex` 仍然显示为已安装，就可以认为安装结果已经生效。
+只要重新检测后目标组件仍然显示为已安装，就可以认为安装结果已经生效。
 
 ## 第九步：失败后应该怎么处理
 
@@ -208,7 +214,7 @@
 处理方法：
 
 1. 关闭当前程序。
-2. 找到安装后的 `Codex Deploy` 或安装包。
+2. 找到安装后的 `AI Dev Installer` 或安装包。
 3. 右键选择“以管理员身份运行”。
 
 ### 2. 某个组件明明装过，页面仍提示未安装
@@ -245,13 +251,13 @@
 
 如果你只想看最短步骤，可以按下面做：
 
-1. 双击 `Codex Deploy_0.1.0_x64-setup.exe`
+1. 双击 `AI Dev Installer_0.1.0_x64-setup.exe`
 2. 按安装向导完成安装
-3. 打开 `Codex Deploy`
+3. 打开 `AI Dev Installer`
 4. 点击 `重新检测环境`
 5. 点击 `全部安装`
 6. 等待执行完成
-7. 确认 `Codex` 显示为已安装
+7. 确认目标组件显示为已安装
 
 ## 需要协助时，建议提供这些信息
 
@@ -261,6 +267,6 @@
 2. `安装进度` 区域截图
 3. `组件状态` 区域截图
 4. `状态日志` 区域截图
-5. 你点击的是 `安装 Codex` 还是 `全部安装`
+5. 你点击的是 `安装 Codex`、`安装 Claude Code` 还是 `全部安装`
 
 这样更方便快速判断问题发生在哪个阶段。

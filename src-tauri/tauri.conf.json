@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Codex Deploy",
+  "productName": "AI Dev Installer",
   "version": "0.1.0",
   "identifier": "com.evanmaranzano.codex-deploy",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Codex Deploy",
+        "title": "AI Dev Installer",
         "width": 1200,
         "height": 800,
         "resizable": true

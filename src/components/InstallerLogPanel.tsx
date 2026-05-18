@@ -13,6 +13,7 @@ const STAGE_LABELS: Record<InstallerLogEntry["stage"], string> = {
   install_cc_switch: "INSTALL_CC_SWITCH",
   refresh_environment: "REFRESH_ENVIRONMENT",
   install_codex: "INSTALL_CODEX",
+  install_claude_code: "INSTALL_CLAUDE_CODE",
   verify: "VERIFY",
   completed: "COMPLETED",
   failed: "FAILED"

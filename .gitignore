@@ -2,6 +2,7 @@ node_modules/
 dist/
 
 src-tauri/target/
+src-tauri/target-*/
 src-tauri/resources/third_party/*/
 !src-tauri/resources/third_party/manifest.json
 !src-tauri/resources/third_party/LICENSES/

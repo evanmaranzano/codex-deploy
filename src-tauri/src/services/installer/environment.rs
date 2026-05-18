@@ -71,6 +71,7 @@ pub fn build_initial_snapshot(probe: &dyn EnvironmentProbe) -> InstallerSnapshot
         component_from_detection(probe, "node", "Node.js"),
         cc_switch_component_from_detection(probe),
         codex_component_from_detection(probe),
+        claude_code_component_from_detection(probe),
     ];
 
     InstallerSnapshot {
@@ -161,6 +162,28 @@ fn codex_component_from_detection(probe: &dyn EnvironmentProbe) -> InstallerComp
             detail: "未检测到".into(),
             version: None,
         }
+    }
+}
+
+fn claude_code_component_from_detection(probe: &dyn EnvironmentProbe) -> InstallerComponentState {
+    for command in ["claude", "claude.exe"] {
+        if let Some(found) = probe.detect_binary(command) {
+            return InstallerComponentState {
+                id: "claude_code".into(),
+                label: "Claude Code".into(),
+                status: InstallerComponentStatus::Installed,
+                detail: found.path.unwrap_or_else(|| "已检测到命令".into()),
+                version: found.version,
+            };
+        }
+    }
+
+    InstallerComponentState {
+        id: "claude_code".into(),
+        label: "Claude Code".into(),
+        status: InstallerComponentStatus::NotInstalled,
+        detail: "未检测到".into(),
+        version: None,
     }
 }
 

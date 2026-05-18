@@ -11,7 +11,7 @@ test("renders installer progress, component states, and logs", async () => {
   render(
     <InstallerPage
       snapshot={{
-        currentStage: "install_codex",
+        currentStage: "install_claude_code",
         progressPercent: 72,
         components: [
           { id: "git", label: "Git", status: "installed", detail: "已检测到 Git", version: "2.45.1" },
@@ -42,14 +42,21 @@ test("renders installer progress, component states, and logs", async () => {
             status: "installing",
             detail: "正在执行 npm install -g @openai/codex",
             version: null
+          },
+          {
+            id: "claude_code",
+            label: "Claude Code",
+            status: "failed",
+            detail: "Claude Code 安装失败",
+            version: null
           }
         ],
         logs: [
           {
             timestamp: "10:00:00",
-            stage: "install_codex",
+            stage: "install_claude_code",
             level: "info",
-            message: "开始安装 Codex"
+            message: "开始安装 Claude Code"
           }
         ],
         lastError: null
@@ -58,6 +65,7 @@ test("renders installer progress, component states, and logs", async () => {
       hasInitializationError={false}
       isRefreshingSnapshot={false}
       onInstallCodex={vi.fn()}
+      onInstallClaudeCode={vi.fn()}
       onInstallAll={onInstallAll}
       onRefreshSnapshot={onRefreshSnapshot}
       onRetryStage={vi.fn()}
@@ -65,18 +73,20 @@ test("renders installer progress, component states, and logs", async () => {
     />
   );
 
-  expect(screen.getByRole("heading", { name: "Codex Deploy", level: 1 })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "AI Dev Installer", level: 1 })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "重新检测环境" })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "安装 Codex" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "安装 Claude Code" })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "全部安装" })).toBeInTheDocument();
   expect(screen.getByRole("heading", { name: "状态日志", level: 2 })).toBeInTheDocument();
-  expect(screen.getByText("当前阶段：安装 Codex")).toBeInTheDocument();
+  expect(screen.getByText("当前阶段：安装 Claude Code")).toBeInTheDocument();
   expect(screen.getByText("72%")).toBeInTheDocument();
   expect(screen.getByText("安装中")).toBeInTheDocument();
   expect(screen.getByText("正在执行 npm install -g @openai/codex")).toBeInTheDocument();
-  expect(screen.getByText("[INSTALL_CODEX]")).toBeInTheDocument();
+  expect(screen.getByText("Claude Code 安装失败")).toBeInTheDocument();
+  expect(screen.getByText("[INSTALL_CLAUDE_CODE]")).toBeInTheDocument();
   expect(screen.getByText("INFO")).toBeInTheDocument();
-  expect(screen.getByText("开始安装 Codex")).toBeInTheDocument();
+  expect(screen.getByText("开始安装 Claude Code")).toBeInTheDocument();
 
   await user.click(screen.getByRole("button", { name: "全部安装" }));
   expect(onInstallAll).toHaveBeenCalledTimes(1);
@@ -116,6 +126,7 @@ test("renders failed retry state and initialization failure message", () => {
       hasInitializationError
       isRefreshingSnapshot={false}
       onInstallCodex={vi.fn()}
+      onInstallClaudeCode={vi.fn()}
       onInstallAll={vi.fn()}
       onRefreshSnapshot={vi.fn()}
       onRetryStage={onRetryStage}
@@ -126,6 +137,7 @@ test("renders failed retry state and initialization failure message", () => {
   expect(screen.getByRole("heading", { name: "初始化失败", level: 2 })).toBeInTheDocument();
   expect(screen.getByRole("alert")).toHaveTextContent("初始化失败：loadInstallerSnapshot 调用失败");
   expect(screen.getByRole("button", { name: "安装 Codex" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "安装 Claude Code" })).toBeDisabled();
   expect(screen.getByRole("button", { name: "全部安装" })).toBeDisabled();
   expect(screen.getByRole("button", { name: "重试当前阶段" })).toBeEnabled();
   expect(screen.getByRole("button", { name: "重新执行全部安装" })).toBeEnabled();
@@ -154,6 +166,7 @@ test("shows retry actions when the snapshot is failed", () => {
       hasInitializationError={false}
       isRefreshingSnapshot={false}
       onInstallCodex={vi.fn()}
+      onInstallClaudeCode={vi.fn()}
       onInstallAll={vi.fn()}
       onRefreshSnapshot={vi.fn()}
       onRetryStage={vi.fn()}
