@@ -12,7 +12,7 @@
 
 ## 快速开始
 
-1. 从 Release 页面下载 `AI Dev Installer_0.1.0_x64-setup.exe`
+1. 下载最新的 Windows 安装包 `AI Dev Installer_0.1.0_x64-setup.exe`
 2. 安装后以管理员身份启动应用
 3. 按需要点击 `安装 Codex`、`安装 Claude Code` 或 `全部安装`
 4. 等待界面完成最终校验
@@ -97,7 +97,7 @@ src-tauri/target/release/bundle/nsis/
 ## 项目结构
 
 ```text
-codex-deploy/
+ai-dev-installer/
 ├── src/                # React 前端
 ├── src-tauri/          # Rust + Tauri 后端
 ├── docs/               # 安装说明与截图
