@@ -4,11 +4,24 @@
 
 它把环境检测、依赖安装、状态展示和失败重试放进一个桌面应用里，目标是让用户不必手动逐个安装 Git、Python、Node.js、CC Switch，再自己排查 PATH 和权限问题。
 
+适合这几类场景：
+
+- 新机器第一次配置 AI 开发环境
+- 希望统一安装 Codex 与 Claude Code
+- 不想手动处理 PATH、权限和基础依赖
+
 ## 下载
 
 - [最新 Release](https://github.com/evanmaranzano/codex-deploy/releases/latest)
 - [安装包下载页](https://github.com/evanmaranzano/codex-deploy/releases)
 - [安装说明](docs/codex-deploy-安装说明.md)
+
+## 快速开始
+
+1. 从 Release 页面下载 `AI Dev Installer_0.1.0_x64-setup.exe`
+2. 安装后以管理员身份启动应用
+3. 按需要点击 `安装 Codex`、`安装 Claude Code` 或 `全部安装`
+4. 等待界面完成最终校验
 
 ## 功能
 
@@ -20,6 +33,8 @@
 - 实时展示当前阶段、组件状态和安装日志
 - 安装失败后支持重试当前阶段或重新执行全部流程
 - 安装后自动刷新环境探测，尽量避免因为旧 PATH 导致必须重启电脑
+- `全部安装` 中会先完成 Codex，再执行 Claude Code
+- 如果 `全部安装` 中 Claude Code 失败，只会单独标记 Claude Code 失败，不会把主流程整体判定为失败
 
 ## 当前覆盖组件
 
